@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import SectionFooterCards from '../components/SectionFooterCards'
+import { socials } from '../data/siteContent'
 
 function ContactPage({ section, theme }) {
   const [name, setName] = useState('')
@@ -32,76 +33,90 @@ function ContactPage({ section, theme }) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-1 flex-col py-8">
-        <div className="contact-form-panel mx-auto my-auto w-full max-w-[42rem] p-6">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+      <div className="flex flex-1 flex-col py-5 lg:py-8">
+        <div className="contact-form-panel mx-auto my-auto w-full max-w-[42rem] p-4 sm:p-5 lg:p-6">
+          <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium text-white">Contact Form</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-500">
+              <p className="mt-1 text-xs uppercase tracking-[0.22em] text-white/34">
                 Professional Inquiry
               </p>
             </div>
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-white/50" />
-              <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Available</span>
+              <span className="text-xs uppercase tracking-[0.16em] text-white/34">Available</span>
             </div>
           </div>
 
           <div className="grid gap-4 py-5">
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="grid gap-2">
-                <span className="text-[0.68rem] uppercase tracking-[0.2em] text-slate-500">Name</span>
+                <span className="text-[0.68rem] uppercase tracking-[0.2em] text-white/34">Name</span>
                 <input
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Your name"
-                  className="border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/20"
+                  className="contact-form-field rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
                 />
               </label>
 
               <label className="grid gap-2">
-                <span className="text-[0.68rem] uppercase tracking-[0.2em] text-slate-500">Email</span>
+                <span className="text-[0.68rem] uppercase tracking-[0.2em] text-white/34">Email</span>
                 <input
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="you@example.com"
-                  className="border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/20"
+                  className="contact-form-field rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
                 />
               </label>
             </div>
 
             <label className="grid gap-2">
-              <span className="text-[0.68rem] uppercase tracking-[0.2em] text-slate-500">Subject</span>
+              <span className="text-[0.68rem] uppercase tracking-[0.2em] text-white/34">Subject</span>
               <input
                 type="text"
                 value={subject}
                 onChange={(event) => setSubject(event.target.value)}
                 placeholder="Project inquiry"
-                className="border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/20"
+                className="contact-form-field rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
               />
             </label>
 
             <label className="grid gap-2">
-              <span className="text-[0.68rem] uppercase tracking-[0.2em] text-slate-500">Message</span>
+              <span className="text-[0.68rem] uppercase tracking-[0.2em] text-white/34">Message</span>
               <textarea
                 rows="6"
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 placeholder="Write your message here..."
-                className="min-h-[10rem] resize-none border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-7 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/20"
+                className="contact-form-field min-h-[10rem] resize-none rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-7 text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
               />
             </label>
 
-            <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
-              <p className="text-sm leading-6 text-slate-400">
-                Available through {section.items.join(', ')}.
-              </p>
+            <div className="flex flex-col gap-4 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3 text-sm text-white/52">
+                <span>Available through</span>
+                <div className="flex items-center gap-3">
+                  {socials.map((social) => (
+                    <a
+                      key={social.id}
+                      href={social.id === 'gmail' ? 'mailto:itsmarkmacaraig@gmail.com' : social.href}
+                      aria-label={social.label}
+                      className="text-white/58 transition hover:text-white"
+                    >
+                      <span className="flex h-5 w-5 items-center justify-center">
+                        {social.icon}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={handleSend}
-                className="inline-flex h-11 items-center border border-white/12 bg-white/[0.04] px-5 text-sm text-slate-100 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                className="inline-flex h-11 items-center rounded-md border border-white/12 bg-white/[0.04] px-5 text-sm text-slate-100 transition hover:bg-[#93a66b]/12 hover:text-white"
               >
                 Submit
               </button>

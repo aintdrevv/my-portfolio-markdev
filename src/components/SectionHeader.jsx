@@ -36,8 +36,8 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
   }, [])
 
   return (
-    <div className="relative px-1 py-2 pb-8">
-      <div className="flex items-start justify-between gap-6">
+    <div className="relative px-1 py-1 pb-6 lg:py-2 lg:pb-8">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
         <div className="max-w-4xl">
           <div className="flex items-center gap-3">
             <p className={`font-dm-mono text-[10px] uppercase tracking-[0.28em] ${
@@ -48,16 +48,16 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
             <span className={`h-px w-10 ${isLightTheme ? 'bg-[#7f886f]' : 'bg-white/30'}`} />
           </div>
 
-          <div className="relative mt-5">
+          <div className="relative mt-4 lg:mt-5">
             <p
               aria-hidden="true"
-              className={`font-bebas pointer-events-none select-none text-[72px] leading-none uppercase tracking-[0.08em] sm:text-[80px] md:text-[88px] ${
+              className={`font-bebas pointer-events-none select-none text-[52px] leading-none uppercase tracking-[0.08em] sm:text-[64px] md:text-[80px] lg:text-[88px] ${
                 isLightTheme ? 'text-[#93a66b]/10' : 'text-white/[0.055]'
               }`}
             >
               {ghostWord}
             </p>
-            <h2 className={`font-space-grotesk relative z-10 -mt-4 max-w-[18ch] text-[26px] leading-[1.05] font-medium tracking-[-0.04em] sm:text-[28px] md:text-[30px] ${
+            <h2 className={`font-space-grotesk relative z-10 -mt-3 max-w-[18ch] text-[22px] leading-[1.05] font-medium tracking-[-0.04em] sm:text-[24px] md:text-[28px] lg:-mt-4 lg:text-[30px] ${
               isLightTheme ? 'text-[#24281f]' : 'text-white/88'
             }`}>
               {accentIndex >= 0 ? (
@@ -75,7 +75,7 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="hidden shrink-0 items-center gap-3 lg:flex">
           <div className={`font-dm-mono text-[10px] uppercase tracking-[0.24em] ${
             isLightTheme ? 'text-[#5f6850]' : 'text-white/34'
           }`}>
