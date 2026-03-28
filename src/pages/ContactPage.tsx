@@ -139,7 +139,8 @@ function ContactPage({ section, theme }) {
           setEmail('')
           setSubject('')
           setMessage('')
-          setSendSuccess('Message sent successfully. I will get back to you soon.')
+          const successMessage = 'Message sent successfully. I will get back to you soon.'
+          setSendSuccess(successMessage)
           resetButtonLabel()
         } catch (error) {
           const messageText = error instanceof Error ? error.message : 'Failed to send message'
