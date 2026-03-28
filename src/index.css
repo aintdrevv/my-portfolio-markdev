@@ -77,21 +77,6 @@ body {
   display: none;
 }
 
-.projects-preview-scroll {
-  scroll-behavior: smooth;
-  overscroll-behavior-y: contain;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.projects-preview-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.projects-preview-panel {
-  overflow: hidden;
-}
-
 .projects-preview-image {
   transform: scale(1.01);
   transition: transform 360ms ease, filter 360ms ease;
