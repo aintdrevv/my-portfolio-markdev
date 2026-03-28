@@ -1,0 +1,106 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@500&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Segoe UI", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  font-family: var(--font-sans);
+  background: #0f1117;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.font-bebas {
+  font-family: "Bebas Neue", var(--font-sans);
+}
+
+.font-dm-mono {
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.font-space-grotesk {
+  font-family: "Space Grotesk", var(--font-sans);
+}
+
+.marquee-mask {
+  --icon-size: 3.5rem;
+  --icon-gap: 0.875rem;
+  --icon-count: 8;
+  --track-width: calc(
+    (var(--icon-size) * var(--icon-count)) +
+      (var(--icon-gap) * var(--icon-count))
+  );
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.marquee-viewport {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 16s linear infinite;
+  gap: 0;
+}
+
+.marquee-track {
+  display: flex;
+  gap: var(--icon-gap);
+  flex-shrink: 0;
+}
+
+.projects-preview-scroll {
+  scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.projects-preview-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.projects-preview-panel {
+  overflow: hidden;
+}
+
+.projects-preview-image {
+  transform: scale(1.01);
+  transition: transform 360ms ease, filter 360ms ease;
+  filter: saturate(1) brightness(1);
+}
+
+.projects-preview-panel:hover .projects-preview-image {
+  transform: scale(1.02);
+  filter: saturate(1.02) brightness(1.02);
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-1 * var(--track-width)));
+  }
+}
