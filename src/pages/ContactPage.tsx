@@ -12,6 +12,8 @@ function ContactPage({ section, theme }) {
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [sendError, setSendError] = useState('')
+  const [sendSuccess, setSendSuccess] = useState('')
   const buttonTextRef = useRef(null)
 
   const handleMagneticMove = (event) => {
@@ -39,36 +41,11 @@ function ContactPage({ section, theme }) {
     })
   }
 
-  const handleSend = () => {
-    if (isSending) {
-      return
-    }
-
-    const trimmedName = name.trim()
-    const trimmedEmail = email.trim()
-    const trimmedSubject = subject.trim()
-    const trimmedMessage = message.trim()
-
-    if (!trimmedMessage) {
-      return
-    }
-
-    const body = [
-      trimmedName ? `Name: ${trimmedName}` : null,
-      trimmedEmail ? `Email: ${trimmedEmail}` : null,
-      '',
-      trimmedMessage,
-    ]
-      .filter(Boolean)
-      .join('\n')
-
-    const mailtoUrl = `mailto:itsmarkmacaraig@gmail.com?subject=${encodeURIComponent(trimmedSubject || 'Portfolio Inquiry')}&body=${encodeURIComponent(body)}`
+  const playSendTimeline = ({ finalText = 'Sent!', onComplete }) => {
     const buttonNode = buttonTextRef.current
 
-    setIsSending(true)
-
     if (!buttonNode) {
-      window.location.href = mailtoUrl
+      onComplete()
       return
     }
 
@@ -76,15 +53,7 @@ function ContactPage({ section, theme }) {
       defaults: {
         ease: 'sine.inOut',
       },
-      onComplete: () => {
-        window.setTimeout(() => {
-          window.location.href = mailtoUrl
-        }, 700)
-        window.setTimeout(() => {
-          gsap.set(buttonNode, { text: 'Send' })
-          setIsSending(false)
-        }, 1400)
-      },
+      onComplete,
     })
 
     timeline.to(buttonNode, {
@@ -110,11 +79,80 @@ function ContactPage({ section, theme }) {
     timeline.to(buttonNode, {
       duration: 0.2,
       text: {
-        value: 'Sent!',
+        value: finalText,
         type: 'diff',
       },
       ease: 'none',
     }, '+=0.2')
+  }
+
+  const resetButtonLabel = (delay = 1400) => {
+    const buttonNode = buttonTextRef.current
+    window.setTimeout(() => {
+      if (buttonNode) {
+        gsap.set(buttonNode, { text: 'Send' })
+      }
+      setIsSending(false)
+    }, delay)
+  }
+
+  const handleSend = () => {
+    if (isSending) {
+      return
+    }
+
+    const trimmedName = name.trim()
+    const trimmedEmail = email.trim()
+    const trimmedSubject = subject.trim()
+    const trimmedMessage = message.trim()
+
+    if (!trimmedMessage) {
+      return
+    }
+
+    setIsSending(true)
+    setSendError('')
+    setSendSuccess('')
+
+    playSendTimeline({
+      onComplete: async () => {
+        try {
+          const response = await fetch('/api/contact', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: trimmedName,
+              email: trimmedEmail,
+              subject: trimmedSubject,
+              message: trimmedMessage,
+            }),
+          })
+
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}))
+            throw new Error(data?.error || 'Failed to send message')
+          }
+
+          setName('')
+          setEmail('')
+          setSubject('')
+          setMessage('')
+          setSendSuccess('Message sent successfully. I will get back to you soon.')
+          resetButtonLabel()
+        } catch (error) {
+          const messageText = error instanceof Error ? error.message : 'Failed to send message'
+          setSendError(messageText)
+          setSendSuccess('')
+          const buttonNode = buttonTextRef.current
+          if (buttonNode) {
+            gsap.set(buttonNode, { text: 'Retry' })
+          }
+          setIsSending(false)
+        }
+      },
+    })
   }
 
   return (
@@ -178,8 +216,20 @@ function ContactPage({ section, theme }) {
                 onChange={(event) => setMessage(event.target.value)}
                 placeholder="Write your message here..."
                 className="contact-form-field min-h-[10rem] resize-none rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-7 text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
-              />
+              ></textarea>
             </label>
+
+            {sendSuccess ? (
+              <p className="rounded-md border border-[#93a66b]/28 bg-[#93a66b]/10 px-4 py-3 text-sm text-[#d8e6bf]">
+                {sendSuccess}
+              </p>
+            ) : null}
+
+            {sendError ? (
+              <p className="rounded-md border border-[#d8a29d]/28 bg-[#d8a29d]/10 px-4 py-3 text-sm text-[#f0c5c0]">
+                {sendError}
+              </p>
+            ) : null}
 
             <div className="flex flex-col gap-4 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3 text-sm text-white/52">
