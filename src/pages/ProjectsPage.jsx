@@ -1,48 +1,38 @@
+import gsap from 'gsap'
 import { useEffect, useRef, useState } from 'react'
 
-const previewPanels = [
-  '/project-placeholder-black.svg',
-  '/project-placeholder-blue.svg',
-  '/project-placeholder-violet.svg',
+const basePanels = [
+  { id: 'store', src: '/store-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
+  { id: 'bike', src: '/bike-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
+  { id: 'shadow', src: '/shadow-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
+]
+
+const getPanelObjectPosition = (panel) => panel.objectPosition ?? 'center center'
+const getPanelImageScale = (panel) => panel.imageScale ?? 1
+
+const desktopSlots = [
+  { top: 72, left: 0, right: 0, height: 'calc(100% - 72px)', zIndex: 3, opacity: 1, scale: 1 },
+  { top: 40, left: 28, right: 28, height: 'calc(100% - 132px)', zIndex: 2, opacity: 0.9, scale: 1 },
+  { top: 18, left: 58, right: 58, height: 'calc(100% - 188px)', zIndex: 1, opacity: 0.68, scale: 1 },
 ]
 
 function ProjectsPage({ section }) {
-  const projectLabels = section.projects?.map((project) => project.tech?.slice(0, 3).join(' / ')) ?? []
+  const projectLabels = basePanels.map((_, index) => (
+    section.projects?.[index]?.tech?.slice(0, 3).join(' / ') ?? 'React / Vite / CSS'
+  ))
   const previewRef = useRef(null)
-  const panelRefs = useRef([])
-  const snapTimeoutRef = useRef(null)
-  const snappingRef = useRef(false)
+  const wheelDeltaRef = useRef(0)
+  const isAnimatingRef = useRef(false)
+  const panelOrderRef = useRef(basePanels)
   const [zoomedPanel, setZoomedPanel] = useState(null)
   const [isMobile, setIsMobile] = useState(() => (
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   ))
-  const [scrollTop, setScrollTop] = useState(0)
-  const [viewportHeight, setViewportHeight] = useState(0)
+  const [panelOrder, setPanelOrder] = useState(basePanels)
 
   useEffect(() => {
-    const node = previewRef.current
-
-    if (!node) {
-      return undefined
-    }
-
-    const updateViewportHeight = () => {
-      setViewportHeight(node.clientHeight)
-    }
-
-    updateViewportHeight()
-
-    const observer = new ResizeObserver(updateViewportHeight)
-    observer.observe(node)
-
-    return () => {
-      observer.disconnect()
-
-      if (snapTimeoutRef.current) {
-        clearTimeout(snapTimeoutRef.current)
-      }
-    }
-  }, [])
+    panelOrderRef.current = panelOrder
+  }, [panelOrder])
 
   useEffect(() => {
     const handleResize = () => {
@@ -71,41 +61,193 @@ function ProjectsPage({ section }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [zoomedPanel])
 
-  const previewPanelNodes = previewPanels.map((panel, index) => {
-    const start = index * viewportHeight
-    const progress = viewportHeight > 0
-      ? Math.max(0, Math.min((scrollTop - start) / viewportHeight, 1))
-      : 0
-    const maxShrink = [0.08, 0.04, 0.02][index] ?? 0.04
-    const scale = isMobile ? 1 : 1 - (progress * maxShrink)
+  useEffect(() => {
+    const node = previewRef.current
+
+    if (!node || isMobile) {
+      return undefined
+    }
+
+    const movePanels = (direction) => {
+      if (isAnimatingRef.current) {
+        return
+      }
+
+      const items = Array.from(node.querySelectorAll('.projects-loop-item'))
+      if (items.length < 2) {
+        return
+      }
+
+      isAnimatingRef.current = true
+      const currentOrder = panelOrderRef.current
+      const outgoingIndex = direction > 0 ? 0 : items.length - 1
+      const outgoingItem = items[outgoingIndex]
+      const remainingItems = items.filter((_, index) => index !== outgoingIndex)
+      const destinationSlots = direction > 0
+        ? desktopSlots.slice(0, remainingItems.length)
+        : desktopSlots.slice(1, items.length)
+
+      gsap.killTweensOf(items)
+
+      const timeline = gsap.timeline({
+        defaults: {
+          duration: 0.42,
+          ease: 'power2.inOut',
+          force3D: true,
+        },
+        onComplete: () => {
+          setPanelOrder(() => {
+            if (direction > 0) {
+              return [...currentOrder.slice(1), currentOrder[0]]
+            }
+
+            return [currentOrder[currentOrder.length - 1], ...currentOrder.slice(0, -1)]
+          })
+
+          if (direction < 0) {
+            isAnimatingRef.current = false
+            return
+          }
+
+          requestAnimationFrame(() => {
+            const reorderedItems = Array.from(node.querySelectorAll('.projects-loop-item'))
+            gsap.fromTo(reorderedItems, {
+              autoAlpha: (_, index) => (index === reorderedItems.length - 1 ? 0.72 : 1),
+              y: (_, index) => (index === reorderedItems.length - 1 ? 28 : 0),
+            }, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.28,
+              ease: 'power2.out',
+              clearProps: 'opacity,y,yPercent',
+              onComplete: () => {
+                isAnimatingRef.current = false
+              },
+            })
+          })
+        },
+      })
+
+      if (direction > 0) {
+        timeline.to(outgoingItem, {
+          yPercent: 110,
+          autoAlpha: 1,
+          duration: 0.44,
+          ease: 'power3.inOut',
+          force3D: true,
+        }, 0)
+      }
+
+      remainingItems.forEach((item, index) => {
+        const slot = destinationSlots[index]
+
+        if (!slot) {
+          return
+        }
+
+        timeline.to(item, {
+          top: slot.top,
+          left: slot.left ?? 0,
+          right: slot.right ?? 0,
+          height: slot.height,
+          opacity: slot.opacity,
+          scale: slot.scale ?? 1,
+          ease: 'power3.inOut',
+          force3D: true,
+        }, direction < 0 ? 0.12 : 0.26)
+      })
+
+      if (direction < 0) {
+        const recycledItem = outgoingItem
+        const frontSlot = desktopSlots[0]
+
+        if (recycledItem && frontSlot) {
+          gsap.set(recycledItem, {
+            top: frontSlot.top,
+            left: frontSlot.left ?? 0,
+            right: frontSlot.right ?? 0,
+            height: frontSlot.height,
+            opacity: frontSlot.opacity,
+            scale: frontSlot.scale ?? 1,
+            zIndex: frontSlot.zIndex + 1,
+            yPercent: 100,
+            autoAlpha: 1,
+          })
+
+          timeline.to(recycledItem, {
+            yPercent: 0,
+            duration: 0.52,
+            ease: 'power3.out',
+            force3D: true,
+            clearProps: 'yPercent',
+          }, 0)
+        }
+      }
+
+    }
+
+    const handleWheel = (event) => {
+      event.preventDefault()
+
+      wheelDeltaRef.current += event.deltaY
+
+      if (Math.abs(wheelDeltaRef.current) < 36) {
+        return
+      }
+
+      const direction = wheelDeltaRef.current > 0 ? 1 : -1
+      wheelDeltaRef.current = 0
+      movePanels(direction)
+    }
+
+    node.addEventListener('wheel', handleWheel, { passive: false })
+
+    return () => {
+      node.removeEventListener('wheel', handleWheel)
+    }
+  }, [isMobile, panelOrder])
+
+  const desktopPanelNodes = panelOrder.map((panel, index) => {
+    const slot = desktopSlots[index] ?? desktopSlots[desktopSlots.length - 1]
+    const labelIndex = basePanels.findIndex((basePanel) => basePanel.id === panel.id)
 
     return (
       <div
-        key={panel}
-        className="projects-preview-panel sticky snap-start"
-        ref={(node) => {
-          panelRefs.current[index] = node
-        }}
+        key={panel.id}
+        data-panel-id={panel.id}
+        className="projects-loop-item absolute overflow-hidden"
         style={{
-          top: isMobile ? '0px' : `${index * 28}px`,
-          height: isMobile ? '100%' : `calc(100% - ${index * 28}px)`,
-          zIndex: index + 1,
-          transform: `scale(${scale})`,
-          transformOrigin: 'top center',
+          top: `${slot.top}px`,
+          left: `${slot.left ?? 0}px`,
+          right: `${slot.right ?? 0}px`,
+          height: slot.height,
+          zIndex: slot.zIndex,
+          opacity: slot.opacity,
+          transform: `scale(${slot.scale ?? 1})`,
+          transformOrigin: 'center top',
+          willChange: 'transform, opacity',
+          backfaceVisibility: 'hidden',
         }}
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start px-4 pt-3 md:px-5 md:pt-4">
           <span className="font-dm-mono text-[0.65rem] uppercase tracking-[0.24em] text-white/62">
-            {projectLabels[index] ?? 'React / Vite / CSS'}
+            {projectLabels[labelIndex] ?? 'React / Vite / CSS'}
           </span>
         </div>
         <img
-          src={panel}
+          src={panel.src}
           alt=""
           aria-hidden="true"
           draggable={false}
           className="projects-preview-image pointer-events-none block h-full w-full select-none object-cover"
-          style={{ WebkitUserSelect: 'none', userSelect: 'none', touchAction: 'pan-y' }}
+          style={{
+            WebkitUserSelect: 'none',
+            userSelect: 'none',
+            objectPosition: getPanelObjectPosition(panel),
+            transform: `scale(${getPanelImageScale(panel)})`,
+            willChange: 'transform, opacity',
+            backfaceVisibility: 'hidden',
+          }}
         />
       </div>
     )
@@ -126,11 +268,11 @@ function ProjectsPage({ section }) {
       <div className="relative min-h-0 flex-1 px-0 md:px-5">
         {isMobile ? (
           <div className="w-full">
-            {previewPanels.map((panel, index) => (
+            {basePanels.map((panel, index) => (
               <button
-                key={panel}
+                key={panel.id}
                 type="button"
-                onClick={() => setZoomedPanel(panel)}
+                onClick={() => setZoomedPanel(panel.src)}
                 className="relative block h-[78svh] w-full overflow-hidden text-left"
                 aria-label={`Open project preview ${index + 1}`}
               >
@@ -140,12 +282,17 @@ function ProjectsPage({ section }) {
                   </span>
                 </div>
                 <img
-                  src={panel}
+                  src={panel.src}
                   alt=""
                   aria-hidden="true"
                   draggable={false}
                   className="block h-full w-full select-none object-cover"
-                  style={{ WebkitUserSelect: 'none', userSelect: 'none' }}
+                  style={{
+                    WebkitUserSelect: 'none',
+                    userSelect: 'none',
+                    objectPosition: getPanelObjectPosition(panel),
+                    transform: `scale(${getPanelImageScale(panel)})`,
+                  }}
                 />
               </button>
             ))}
@@ -153,61 +300,15 @@ function ProjectsPage({ section }) {
         ) : (
           <div
             ref={previewRef}
-            className="projects-preview-scroll h-full overflow-y-auto"
-            style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y', overscrollBehaviorY: 'contain' }}
-            onScroll={(event) => {
-              const node = event.currentTarget
-              const nextScrollTop = node.scrollTop
-
-              setScrollTop(nextScrollTop)
-
-              if (snappingRef.current) {
-                return
-              }
-
-              if (snapTimeoutRef.current) {
-                clearTimeout(snapTimeoutRef.current)
-              }
-
-              snapTimeoutRef.current = setTimeout(() => {
-                const offsets = panelRefs.current
-                  .map((panelNode) => panelNode?.offsetTop ?? 0)
-                  .filter((offset, offsetIndex, array) => array.indexOf(offset) === offset)
-
-                if (offsets.length === 0) {
-                  return
-                }
-
-                const targetTop = offsets.reduce((closest, offset) => (
-                  Math.abs(offset - node.scrollTop) < Math.abs(closest - node.scrollTop) ? offset : closest
-                ))
-
-                if (Math.abs(targetTop - node.scrollTop) < 2) {
-                  return
-                }
-
-                snappingRef.current = true
-                node.scrollTo({
-                  top: targetTop,
-                  behavior: 'smooth',
-                })
-
-                window.setTimeout(() => {
-                  snappingRef.current = false
-                }, 220)
-              }, 110)
-            }}
+            className="relative h-full overflow-hidden"
+            style={{ touchAction: 'pan-y', overscrollBehaviorY: 'contain' }}
           >
-            {previewPanelNodes}
+            {desktopPanelNodes}
           </div>
         )}
       </div>
 
-      <div
-        className={`pointer-events-none absolute inset-x-0 bottom-10 z-40 hidden justify-center transition duration-300 md:flex ${
-          scrollTop > 24 ? 'translate-y-2 opacity-0' : 'opacity-100'
-        }`}
-      >
+      <div className="pointer-events-none absolute inset-x-0 bottom-10 z-40 hidden justify-center transition duration-300 md:flex opacity-100">
         <div className="projects-scroll-indicator flex items-center gap-2 font-dm-mono text-[0.62rem] uppercase tracking-[0.22em] text-white/52">
           <span className="text-white/42">↓</span>
           <span>Scroll to view</span>
@@ -249,7 +350,6 @@ function ProjectsPage({ section }) {
           </div>
         </div>
       ) : null}
-
     </div>
   )
 }
