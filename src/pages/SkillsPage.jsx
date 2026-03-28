@@ -1,209 +1,162 @@
-import SectionFooterCards from '../components/SectionFooterCards'
+const ACCENT = '#7f8f5c'
 
-function SkillsPage({ section, theme }) {
+function CellBar() {
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 overflow-hidden">
-        <div className="flex h-full flex-col">
-          <div className="w-full pt-8 pb-4">
-            <div className="w-full max-w-[48rem] px-5 py-4">
-              <p className="max-w-[36rem] text-left text-base leading-8 text-slate-300">
-                {section.description}
-              </p>
-            </div>
-          </div>
+    <div className="absolute inset-x-0 top-0 h-[2px] bg-white/14 transition duration-300 group-hover:bg-[#93a66b]" />
+  )
+}
 
-          <div className="flex min-h-0 flex-1 justify-center pt-4 pb-0">
-            <div className="min-h-0 w-full max-w-[74rem] overflow-y-auto pr-2">
-              <div className="flex flex-col gap-4">
-                {section.groups.map((group) => {
-                  const groupData =
-                    group.title === 'Frontend'
-                      ? {
-                          positions: [
-                            'md:col-span-1 md:row-span-2',
-                            'md:col-span-1 md:row-span-1 md:col-start-2 md:row-start-1',
-                            'md:col-span-1 md:row-span-1 md:col-start-3 md:row-start-1',
-                            'md:col-span-1 md:row-span-1 md:col-start-4 md:row-start-1',
-                            'md:col-span-2 md:row-span-1 md:col-start-2 md:row-start-2 md:self-center',
-                            'md:col-span-1 md:row-span-1 md:col-start-4 md:row-start-2',
-                            'md:col-span-1 md:row-span-1 md:col-start-1 md:row-start-3',
-                            'md:col-span-1 md:row-span-1 md:col-start-3 md:row-start-3',
-                            'md:col-span-1 md:row-span-1 md:col-start-4 md:row-start-3',
-                          ],
-                          items: [
-                            { label: group.items[0], size: 'normal' },
-                            { label: group.items[1], size: 'normal' },
-                            { label: group.items[2], size: 'mini' },
-                            { type: 'split' },
-                            { label: group.title, size: 'title' },
-                            { label: group.items[5], size: 'normal' },
-                            { label: group.items[6], size: 'normal' },
-                            { label: group.items[7], size: 'mini' },
-                            { label: group.items[8], size: 'empty' },
-                          ],
-                        }
-                      : group.title === 'Tools'
-                        ? {
-                            positions: [
-                              'md:col-span-1 md:row-span-1 md:col-start-2 md:row-start-1',
-                              'md:col-span-1 md:row-span-2 md:col-start-4 md:row-start-1',
-                              'md:col-span-2 md:row-span-1 md:col-start-1 md:row-start-1',
-                              'md:col-span-2 md:row-span-1 md:col-start-2 md:row-start-2 md:self-center',
-                              'md:col-span-1 md:row-span-1 md:col-start-1 md:row-start-2',
-                              'md:col-span-1 md:row-span-1 md:col-start-4 md:row-start-3',
-                              'md:col-span-1 md:row-span-1 md:col-start-2 md:row-start-3',
-                              'md:col-span-1 md:row-span-1 md:col-start-3 md:row-start-3',
-                              'md:col-span-1 md:row-span-1 md:col-start-1 md:row-start-3',
-                            ],
-                            items: [
-                              { type: 'skip' },
-                              { label: group.items[1], size: 'normal' },
-                              { type: 'toolsTriple' },
-                              { label: group.title, size: 'title' },
-                              { label: group.items[3], size: 'normal' },
-                              { label: group.items[4], size: 'mini' },
-                              { type: 'toolsSmallPair' },
-                              { type: 'skip' },
-                              { label: group.items[7], size: 'mini' },
-                            ],
-                          }
-                        : {
-                            positions: [
-                              'md:col-span-1 md:row-span-1 md:col-start-3 md:row-start-1',
-                              'md:col-span-1 md:row-span-1 md:col-start-1 md:row-start-1',
-                              'md:col-span-1 md:row-span-2 md:col-start-4 md:row-start-1',
-                              'md:col-span-2 md:row-span-1 md:col-start-2 md:row-start-2 md:self-center',
-                              'md:col-span-1 md:row-span-1 md:col-start-1 md:row-start-2',
-                              'md:col-span-1 md:row-span-1 md:col-start-2 md:row-start-1',
-                              'md:col-span-1 md:row-span-1 md:col-start-1 md:row-start-3',
-                              'md:col-span-1 md:row-span-1 md:col-start-2 md:row-start-3',
-                              'md:col-span-1 md:row-span-1 md:col-start-3 md:row-start-3',
-                            ],
-                            items: [
-                              { label: group.items[0], size: 'mini' },
-                              { label: group.items[1], size: 'normal' },
-                              { label: group.items[2], size: 'normal' },
-                              { label: group.title, size: 'title' },
-                              { label: group.items[3], size: 'normal' },
-                              { label: group.items[4], size: 'mini' },
-                              { label: group.items[5], size: 'normal' },
-                              { label: group.items[6], size: 'mini' },
-                              { label: group.items[7], size: 'normal' },
-                            ],
-                          }
+function Pill({ label }) {
+  return (
+    <span className="border border-white/10 bg-white/[0.03] px-2 py-1 font-dm-mono text-[9px] uppercase tracking-[0.07em] text-white/52">
+      {label}
+    </span>
+  )
+}
 
-                  return (
-                    <article
-                      key={group.title}
-                      className="grid min-h-[18rem] grid-cols-1 gap-2.5 md:grid-cols-4 md:grid-rows-3"
-                    >
-                      {groupData.items.map((item, index) => {
-                        if (item.type === 'split') {
-                          return (
-                            <div key={`${group.title}-split`} className={`grid grid-cols-2 gap-2 ${groupData.positions[index]}`}>
-                              <div className="rounded-[1.05rem] bg-white/[0.03] p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-                                <div className="rounded-[0.85rem] bg-black/20 px-3 py-2 text-sm text-slate-300">
-                                  {group.items[3]}
-                                </div>
-                              </div>
-                              <div className="rounded-[1.05rem] bg-white/[0.03] p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-                                <div className="rounded-[0.85rem] bg-black/20 px-3 py-2 text-sm text-slate-300" />
-                              </div>
-                            </div>
-                          )
-                        }
+function HeroCell({ title, description, pills, sub, className }) {
+  return (
+    <div className={`group relative flex min-h-[12.5rem] flex-col justify-between border border-white/8 bg-black/20 px-4 py-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 hover:bg-black/28 ${className}`}>
+      <CellBar />
+      <div>
+        <div
+          className="font-bebas text-[1.85rem] uppercase leading-none tracking-[0.06em] text-[#93a66b]"
+          style={{ color: ACCENT }}
+        >
+          {title}
+        </div>
+        <p className="mt-2 max-w-[13rem] font-space-grotesk text-[11px] font-light leading-6 text-white/35">
+          {description}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-[5px]">
+          {pills.map((pill) => (
+            <Pill key={pill} label={pill} />
+          ))}
+        </div>
+      </div>
+      <div className="mt-3 font-dm-mono text-[9px] uppercase tracking-[0.12em] text-white/20">{sub}</div>
+    </div>
+  )
+}
 
-                        if (item.type === 'toolsTriple') {
-                          return (
-                            <div key={`${group.title}-tools-triple`} className={`grid grid-cols-[0.9fr_2.1fr] gap-2 ${groupData.positions[index]}`}>
-                              <div className="rounded-[1.05rem] bg-white/[0.03] p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-                                <div className="rounded-[0.85rem] bg-black/20 px-3 py-2 text-sm text-slate-300">
-                                  {group.items[0]}
-                                </div>
-                              </div>
-                              <div className="rounded-[1.05rem] bg-white/[0.03] p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-                                <div className="rounded-[0.85rem] bg-black/20 px-3 py-2 text-sm text-slate-300">
-                                  {group.items[2]}
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        }
+function SkillCell({ label, sub, className, mini = false }) {
+  return (
+    <div
+      className={`group relative flex flex-col justify-end border border-white/8 bg-black/20 px-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:border-white/14 hover:bg-black/28 ${mini ? 'min-h-[3.25rem] py-2.5' : 'min-h-[4.75rem] py-3.5'} ${className}`}
+    >
+      <CellBar />
+      <div className={`${mini ? 'text-[11px]' : 'text-[13px]'} font-space-grotesk font-medium text-white/70`}>
+        {label}
+      </div>
+      {sub ? (
+        <div className="mt-1 font-dm-mono text-[9px] uppercase tracking-[0.1em] text-white/20">{sub}</div>
+      ) : null}
+    </div>
+  )
+}
 
-                        if (item.type === 'toolsSmallPair') {
-                          return (
-                            <div key={`${group.title}-tools-small-pair`} className={`grid grid-cols-2 gap-2 ${groupData.positions[index]}`}>
-                              <div className="rounded-[1.05rem] bg-white/[0.03] p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-                                <div className="rounded-[0.85rem] bg-black/20 px-3 py-2 text-sm text-slate-300">
-                                  {group.items[5]}
-                                </div>
-                              </div>
-                              <div className="rounded-[1.05rem] bg-white/[0.03] p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-                                <div className="rounded-[0.85rem] bg-black/20 px-3 py-2 text-sm text-slate-300">
-                                  {group.items[6]}
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        }
+function WideCell({ title, pills, sub, className, topAlign = false }) {
+  return (
+    <div className={`group relative flex justify-between border border-white/8 bg-black/20 px-4 py-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 hover:bg-black/28 ${topAlign ? 'items-start' : 'items-end'} ${className}`}>
+      <CellBar />
+      <div>
+        <div
+          className="font-bebas text-[1.75rem] uppercase leading-none tracking-[0.06em] text-[#93a66b]"
+          style={{ color: ACCENT }}
+        >
+          {title}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-[5px]">
+          {pills.map((pill) => (
+            <Pill key={pill} label={pill} />
+          ))}
+        </div>
+      </div>
+      <div className="font-dm-mono text-[9px] uppercase tracking-[0.12em] text-white/20">{sub}</div>
+    </div>
+  )
+}
 
-                        if (item.type === 'skip') return null
+function MarqueeCell({ className }) {
+  const items = ['TypeScript', 'Next.js', 'Node.js', 'PostgreSQL', 'Framer Motion', 'GSAP', 'React Native']
+  const doubled = [...items, ...items]
 
-                        if (item.size === 'title') {
-                          return (
-                            <div
-                              key={`${group.title}-${index}`}
-                              className={`rounded-[1.3rem] bg-white/[0.035] p-3.5 shadow-[0_12px_40px_rgba(0,0,0,0.22)] ${groupData.positions[index]}`}
-                            >
-                              <div className="flex h-full items-center justify-center text-center">
-                                <h3 className="text-[1.35rem] font-semibold tracking-[-0.05em] text-white">
-                                  {item.label}
-                                </h3>
-                              </div>
-                            </div>
-                          )
-                        }
+  return (
+    <div className={`group relative flex min-h-[4.75rem] flex-col justify-between overflow-hidden border border-white/8 bg-black/20 px-4 py-3 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 hover:bg-black/28 ${className}`}>
+      <CellBar />
+      <style>{`@keyframes skills-marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
+      <div className="font-dm-mono text-[9px] uppercase tracking-[0.14em] text-white/45">
+        Currently Learning
+      </div>
+      <div className="overflow-hidden whitespace-nowrap">
+        <div
+          className="inline-block"
+          style={{ animation: 'skills-marquee 14s linear infinite' }}
+        >
+          {doubled.map((item, index) => (
+            <span
+              key={`${item}-${index}`}
+              className="mr-4 font-dm-mono text-[9px] uppercase tracking-[0.1em] text-white/25"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
-                        if (item.size === 'empty') {
-                          return (
-                            <div
-                              key={`${group.title}-${index}`}
-                              className={`rounded-[1.05rem] bg-white/[0.03] p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)] ${groupData.positions[index]}`}
-                            >
-                              <div className="rounded-[0.85rem] bg-black/20 px-3 py-2 text-sm text-slate-300" />
-                            </div>
-                          )
-                        }
+function SkillsPage() {
+  return (
+    <div className="flex h-full min-h-0 flex-1 flex-col">
+      <div className="flex h-full min-h-0 flex-1 items-center justify-center">
+        <div className="flex w-full items-center justify-center">
+          <div className="grid w-full max-w-[56rem] grid-cols-1 gap-2 pr-2 md:grid-cols-4">
+            <HeroCell
+              title="Frontend"
+              description="Focused on building clean, responsive interfaces with modern frontend tools."
+              pills={['HTML', 'CSS', 'JavaScript', 'React', 'Vite']}
+              sub="core stack"
+              className="md:col-span-2 md:row-span-2"
+            />
+            <SkillCell label="React" sub="framework" className="md:col-span-1" />
+            <SkillCell label="Tailwind" sub="styling" className="md:col-span-1" />
+            <SkillCell label="Vite" sub="bundler" className="md:col-span-1" />
+            <SkillCell label="JavaScript" sub="language" className="md:col-span-1" />
 
-                        const outerClass =
-                          item.size === 'mini'
-                            ? 'rounded-[1.05rem] bg-white/[0.03] p-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]'
-                            : 'rounded-[1.2rem] bg-white/[0.03] p-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]'
-                        const innerClass =
-                          item.size === 'mini'
-                            ? 'rounded-[0.85rem] bg-black/20 px-3 py-2 text-sm text-slate-300'
-                            : 'rounded-[0.95rem] bg-black/20 px-3 py-2.5 text-sm text-slate-300'
+            <SkillCell label="GitHub" sub="versioning" className="md:col-span-1" />
+            <SkillCell label="VS Code" sub="editor" className="md:col-span-1" />
+            <HeroCell
+              title="Tools"
+              description="Workflow and build tools I use while developing and iterating on projects."
+              pills={['Cursor', 'GitHub', 'VS Code', 'Figma', 'npm']}
+              sub="workflow"
+              className="md:col-span-2 md:row-span-2"
+            />
+            <SkillCell label="Figma" sub="design" className="md:col-span-1" />
+            <SkillCell label="Blender" sub="3D" className="md:col-span-1" />
 
-                        return (
-                          <div
-                            key={`${group.title}-${index}`}
-                            className={`${outerClass} ${groupData.positions[index]}`}
-                          >
-                            <div className={innerClass}>{item.label}</div>
-                          </div>
-                        )
-                      })}
-                    </article>
-                  )
-                })}
-              </div>
-            </div>
+            <WideCell
+              title="Styling"
+              pills={['Tailwind CSS', 'Grid', 'Flexbox', 'Typography']}
+              sub="ui system"
+              className="md:col-span-2"
+            />
+            <WideCell
+              title="3D / Design"
+              pills={['Blender', 'Three.js', 'WebGL', 'GSAP']}
+              sub="creative"
+              topAlign
+              className="md:col-span-2"
+            />
+
+            <SkillCell label="Terminal" sub="cli" className="md:col-span-1" mini />
+            <SkillCell label="npm" sub="packages" className="md:col-span-1" mini />
+            <MarqueeCell className="md:col-span-2" />
           </div>
         </div>
       </div>
-
-      <SectionFooterCards theme={theme} />
     </div>
   )
 }

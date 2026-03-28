@@ -2,8 +2,11 @@ export const toolIcons = [
   {
     name: 'React',
     icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-8 w-8 fill-current">
-        <path d="M12 9.47a2.53 2.53 0 1 0 0 5.06 2.53 2.53 0 0 0 0-5.06Zm0-7.22c1.2 0 2.32 1.58 3.05 4.14a15.5 15.5 0 0 1 4.45 1.03c2.23.9 3.5 2.05 3.5 3.08s-1.27 2.18-3.5 3.08a15.5 15.5 0 0 1-4.45 1.03c-.73 2.56-1.84 4.14-3.05 4.14s-2.32-1.58-3.05-4.14a15.5 15.5 0 0 1-4.45-1.03C2.27 12.68 1 11.53 1 10.5s1.27-2.18 3.5-3.08a15.5 15.5 0 0 1 4.45-1.03C9.68 3.83 10.8 2.25 12 2.25Zm0 1.5c-.41 0-1.1.86-1.7 2.68.56-.08 1.13-.12 1.7-.12s1.14.04 1.7.12c-.6-1.82-1.29-2.68-1.7-2.68Zm-3.17 3.2c-1.29.2-2.5.55-3.5.95-1.7.68-2.83 1.51-2.83 2.1s1.13 1.42 2.83 2.1c1 .4 2.21.75 3.5.95A18.2 18.2 0 0 1 8.7 10.5c0-1.16.05-2.22.13-3.05Zm6.34 0c.08.83.13 1.89.13 3.05 0 1.16-.05 2.22-.13 3.05 1.29-.2 2.5-.55 3.5-.95 1.7-.68 2.83-1.51 2.83-2.1s-1.13-1.42-2.83-2.1c-1-.4-2.21-.75-3.5-.95Zm-4.82.74A16.6 16.6 0 0 0 10.2 10.5c0 1 .06 1.95.15 2.81.54.07 1.09.11 1.65.11s1.11-.04 1.65-.11c.09-.86.15-1.81.15-2.81 0-1-.06-1.95-.15-2.81A13.7 13.7 0 0 0 12 7.58c-.56 0-1.11.04-1.65.11Zm-1.54 7.36c.6 1.82 1.29 2.68 1.7 2.68s1.1-.86 1.7-2.68c-.56.08-1.13.12-1.7.12s-1.14-.04-1.7-.12Z" />
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-8 w-8" fill="none">
+        <circle cx="12" cy="12" r="1.9" fill="currentColor" />
+        <ellipse cx="12" cy="12" rx="9" ry="3.8" stroke="currentColor" strokeWidth="1.6" />
+        <ellipse cx="12" cy="12" rx="9" ry="3.8" stroke="currentColor" strokeWidth="1.6" transform="rotate(60 12 12)" />
+        <ellipse cx="12" cy="12" rx="9" ry="3.8" stroke="currentColor" strokeWidth="1.6" transform="rotate(120 12 12)" />
       </svg>
     ),
   },
@@ -23,11 +26,29 @@ export const toolIcons = [
       </svg>
     ),
   },
-  { name: 'JavaScript', icon: <span className="text-[1rem] font-semibold">JS</span> },
-  { name: 'HTML', icon: <span className="text-[0.9rem] font-semibold">HTML</span> },
-  { name: 'CSS', icon: <span className="text-[1rem] font-semibold">CSS</span> },
-  { name: 'Git', icon: <span className="text-[1rem] font-semibold">Git</span> },
-  { name: 'Figma', icon: <span className="text-[0.85rem] font-semibold">Figma</span> },
+  { name: 'JavaScript', icon: <span className="text-[1rem] font-semibold uppercase">JS</span> },
+  { name: 'HTML', icon: <span className="text-[0.82rem] font-semibold uppercase">HTML</span> },
+  { name: 'CSS', icon: <span className="text-[0.95rem] font-semibold uppercase">CSS</span> },
+  {
+    name: 'Cursor',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-8 w-8 fill-current">
+        <path d="M12 2.5 4.5 10 12 17.5 19.5 10 12 2.5Zm0 2.35L17.15 10 12 15.15 6.85 10 12 4.85Zm-4.6 8.5L12 18l-4.6 4.6L2.8 18l4.6-4.65Zm9.2 0L21.2 18l-4.6 4.6L12 18l4.6-4.65Z" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Figma',
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-8 w-8" fill="none">
+        <rect x="6" y="2.5" width="6" height="6" rx="3" fill="currentColor" />
+        <rect x="12" y="2.5" width="6" height="6" rx="3" fill="currentColor" />
+        <rect x="6" y="8.5" width="6" height="6" rx="3" fill="currentColor" />
+        <rect x="12" y="8.5" width="6" height="6" rx="3" fill="currentColor" />
+        <path d="M6 17.5a3 3 0 1 1 6 0v3a3 3 0 1 1-6 0v-3Z" fill="currentColor" />
+      </svg>
+    ),
+  },
 ]
 
 export const socials = [
@@ -87,13 +108,7 @@ export const sections = [
     ghostWord: 'Skills',
     accentText: 'currently use and improve',
     title: 'Tools and technologies I currently use and improve.',
-    description:
-      'A simple categorized view of the tools and technologies I currently use while building projects and improving my frontend workflow.',
-    groups: [
-      { title: 'Frontend', items: ['HTML', 'CSS', 'JavaScript', 'React', 'Vite', 'Responsive UI', 'APIs', 'DOM', ''] },
-      { title: 'Tools', items: ['Git', 'GitHub', 'VS Code', 'Figma', 'npm', 'Terminal', 'DevTools', 'Packages'] },
-      { title: 'Styling', items: ['Tailwind CSS', 'Responsive Design', 'Grid', 'Flexbox', 'Typography', 'Spacing', 'Animations', 'Hierarchy'] },
-    ],
+    description: '',
     type: 'skills',
   },
   {

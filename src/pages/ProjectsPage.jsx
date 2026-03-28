@@ -79,7 +79,7 @@ function ProjectsPage({ section }) {
   })
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col">
       <div className="w-full pt-8 pb-4">
         <div className="w-full max-w-[48rem] px-5 py-4">
           {section.description ? (
@@ -140,6 +140,18 @@ function ProjectsPage({ section }) {
           {previewPanelNodes}
         </div>
       </div>
+
+      <div
+        className={`pointer-events-none absolute inset-x-0 bottom-10 z-40 flex justify-center transition duration-300 ${
+          scrollTop > 24 ? 'translate-y-2 opacity-0' : 'opacity-100'
+        }`}
+      >
+        <div className="projects-scroll-indicator flex items-center gap-2 font-dm-mono text-[0.62rem] uppercase tracking-[0.22em] text-white/52">
+          <span className="text-white/42">↓</span>
+          <span>Scroll to view</span>
+        </div>
+      </div>
+
     </div>
   )
 }

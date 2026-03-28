@@ -16,8 +16,6 @@ const pageComponents = {
 }
 
 const sliderCopies = Array.from({ length: 6 }, (_, copy) => copy)
-const constrainedSections = new Set(['skills'])
-
 function App() {
   const [activeSection, setActiveSection] = useState(sections[0].id)
   const [theme, setTheme] = useState('dark')
@@ -29,7 +27,7 @@ function App() {
 
   return (
     <main className={`h-screen overflow-hidden ${isLightTheme ? 'light-theme bg-[#cdd6b6] text-[#24281f]' : 'bg-[#111315] text-slate-100'}`}>
-      <div className="mx-auto grid h-full max-w-[1556px] grid-cols-[340px_minmax(0,1fr)_40px]">
+      <div className="mx-auto grid h-full max-w-[1528px] grid-cols-[340px_minmax(0,1fr)_40px]">
         <Sidebar
           sections={sections}
           socials={socials}
@@ -73,7 +71,9 @@ function App() {
             />
             <div
               key={currentSection.id}
-              className={`page-transition ${constrainedSections.has(currentSection.id) ? 'min-h-0 flex-1 overflow-hidden' : 'flex-1'}`}
+              className={`page-transition ${
+                currentSection.id === 'skills' || currentSection.id === 'projects' ? 'min-h-0 flex-1' : 'flex-1'
+              }`}
             >
               <ActivePage section={currentSection} sliderCopies={sliderCopies} toolIcons={toolIcons} theme={theme} />
             </div>
