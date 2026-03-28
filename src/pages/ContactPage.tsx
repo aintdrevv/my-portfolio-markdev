@@ -1,14 +1,49 @@
-import { useState } from 'react'
+import gsap from 'gsap'
+import { TextPlugin } from 'gsap/TextPlugin'
+import { useRef, useState } from 'react'
 import SectionFooterCards from '../components/SectionFooterCards'
 import { socials } from '../data/siteContent'
+
+gsap.registerPlugin(TextPlugin)
 
 function ContactPage({ section, theme }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
+  const [isSending, setIsSending] = useState(false)
+  const buttonTextRef = useRef(null)
+
+  const handleMagneticMove = (event) => {
+    const button = event.currentTarget
+    const rect = button.getBoundingClientRect()
+    const offsetX = event.clientX - rect.left - (rect.width / 2)
+    const offsetY = event.clientY - rect.top - (rect.height / 2)
+
+    gsap.to(button, {
+      x: offsetX * 0.16,
+      y: offsetY * 0.2,
+      duration: 0.28,
+      ease: 'power3.out',
+      overwrite: 'auto',
+    })
+  }
+
+  const resetMagneticButton = (event) => {
+    gsap.to(event.currentTarget, {
+      x: 0,
+      y: 0,
+      duration: 0.45,
+      ease: 'elastic.out(1, 0.5)',
+      overwrite: 'auto',
+    })
+  }
 
   const handleSend = () => {
+    if (isSending) {
+      return
+    }
+
     const trimmedName = name.trim()
     const trimmedEmail = email.trim()
     const trimmedSubject = subject.trim()
@@ -28,7 +63,58 @@ function ContactPage({ section, theme }) {
       .join('\n')
 
     const mailtoUrl = `mailto:itsmarkmacaraig@gmail.com?subject=${encodeURIComponent(trimmedSubject || 'Portfolio Inquiry')}&body=${encodeURIComponent(body)}`
-    window.location.href = mailtoUrl
+    const buttonNode = buttonTextRef.current
+
+    setIsSending(true)
+
+    if (!buttonNode) {
+      window.location.href = mailtoUrl
+      return
+    }
+
+    const timeline = gsap.timeline({
+      defaults: {
+        ease: 'sine.inOut',
+      },
+      onComplete: () => {
+        window.setTimeout(() => {
+          window.location.href = mailtoUrl
+        }, 700)
+        window.setTimeout(() => {
+          gsap.set(buttonNode, { text: 'Send' })
+          setIsSending(false)
+        }, 1400)
+      },
+    })
+
+    timeline.to(buttonNode, {
+      duration: 0.8,
+      text: {
+        value: 'Sending...',
+        type: 'diff',
+      },
+      ease: 'sine.in',
+    })
+
+    timeline.to(buttonNode, {
+      duration: 0.45,
+      text: {
+        value: 'Sending',
+        type: 'diff',
+      },
+      ease: 'sine.inOut',
+      repeat: 3,
+      yoyo: true,
+    })
+
+    timeline.to(buttonNode, {
+      duration: 0.2,
+      text: {
+        value: 'Sent!',
+        type: 'diff',
+      },
+      ease: 'none',
+    }, '+=0.2')
   }
 
   return (
@@ -116,9 +202,13 @@ function ContactPage({ section, theme }) {
               <button
                 type="button"
                 onClick={handleSend}
-                className="inline-flex h-11 items-center rounded-md border border-white/12 bg-white/[0.04] px-5 text-sm text-slate-100 transition hover:bg-[#93a66b]/12 hover:text-white"
+                onMouseMove={handleMagneticMove}
+                onMouseLeave={resetMagneticButton}
+                className="inline-flex h-11 items-center justify-center rounded-md border border-white/12 bg-white/[0.04] px-5 text-sm text-slate-100 transition hover:bg-[#93a66b]/12 hover:text-white"
               >
-                Submit
+                <span ref={buttonTextRef} className="inline-flex items-center">
+                  Send
+                </span>
               </button>
             </div>
           </div>

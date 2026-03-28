@@ -1,3 +1,4 @@
+import gsap from 'gsap'
 import { useEffect, useRef, useState } from 'react'
 import SectionHeader from './components/SectionHeader'
 import RightRail from './components/RightRail'
@@ -17,8 +18,11 @@ const pageComponents = {
 }
 
 const sliderCopies = Array.from({ length: 6 }, (_, copy) => copy)
+const cursorSymbols = ['+', 'x', 'o', '::', '/']
+
 function App() {
   const [showWelcome, setShowWelcome] = useState(true)
+  const [isEnteringPortfolio, setIsEnteringPortfolio] = useState(false)
   const [activeSection, setActiveSection] = useState(sections[0].id)
   const [theme, setTheme] = useState('dark')
   const [isMobile, setIsMobile] = useState(() => (
@@ -28,10 +32,23 @@ function App() {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0, active: false })
   const mobileSectionRefs = useRef({})
   const mobileNavHideTimeoutRef = useRef(null)
+  const desktopTransitionRef = useRef(null)
+  const cursorSymbolRefs = useRef([])
+  const cursorTrailIndexRef = useRef(0)
+  const lastTrailPointRef = useRef({ x: 0, y: 0 })
+  const previousSectionIndexRef = useRef(0)
   const currentSection = sections.find((section) => section.id === activeSection) ?? sections[0]
   const ActivePage = pageComponents[currentSection.id]
   const isLightTheme = theme === 'light'
   const toggleTheme = () => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
+
+  const handleEnterPortfolio = () => {
+    setIsEnteringPortfolio(true)
+    window.setTimeout(() => {
+      setShowWelcome(false)
+      setIsEnteringPortfolio(false)
+    }, 520)
+  }
 
   useEffect(() => {
     const handleResize = () => {
@@ -110,6 +127,52 @@ function App() {
     }
   }, [isMobile])
 
+  useEffect(() => {
+    if (isMobile || showWelcome || !desktopTransitionRef.current) {
+      return undefined
+    }
+
+    const currentIndex = sections.findIndex((section) => section.id === activeSection)
+    const previousIndex = previousSectionIndexRef.current
+    const direction = currentIndex >= previousIndex ? 1 : -1
+    previousSectionIndexRef.current = currentIndex
+
+    const ctx = gsap.context(() => {
+      gsap.killTweensOf('[data-page-chrome], [data-page-body]')
+
+      gsap.fromTo('[data-page-chrome]', {
+        autoAlpha: 0,
+        x: 18 * direction,
+        y: 12,
+        rotate: 0.5 * direction,
+      }, {
+        autoAlpha: 1,
+        x: 0,
+        y: 0,
+        rotate: 0,
+        duration: 0.54,
+        ease: 'power4.out',
+      })
+
+      gsap.fromTo('[data-page-body]', {
+        autoAlpha: 0,
+        x: 34 * direction,
+        y: 20,
+        rotate: 0.75 * direction,
+      }, {
+        autoAlpha: 1,
+        x: 0,
+        y: 0,
+        rotate: 0,
+        duration: 0.7,
+        ease: 'power4.out',
+        delay: 0.1,
+      })
+    }, desktopTransitionRef)
+
+    return () => ctx.revert()
+  }, [activeSection, isMobile, showWelcome])
+
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId)
 
@@ -129,10 +192,62 @@ function App() {
     }
   }
 
+  const spawnCursorSymbol = (x, y) => {
+    const symbols = cursorSymbolRefs.current
+
+    if (!symbols.length) {
+      return
+    }
+
+    const wrappedIndex = cursorTrailIndexRef.current % symbols.length
+    const symbolNode = symbols[wrappedIndex]
+
+    if (!symbolNode) {
+      return
+    }
+
+    gsap.killTweensOf(symbolNode)
+    gsap.set(symbolNode, {
+      x,
+      y,
+      xPercent: -50,
+      yPercent: -50,
+      scale: 0,
+      rotation: 0,
+      autoAlpha: 1,
+    })
+
+    const timeline = gsap.timeline()
+
+    timeline.to(symbolNode, {
+      scale: gsap.utils.random(0.95, 1.25),
+      rotation: gsap.utils.random(-36, 36),
+      duration: 0.42,
+      ease: 'back.out(2.2)',
+    })
+
+    timeline.to(symbolNode, {
+      y: y + gsap.utils.random(46, 86),
+      rotation: `+=${gsap.utils.random(-24, 24)}`,
+      autoAlpha: 0,
+      duration: 0.8,
+      ease: 'power2.in',
+    }, 0.04)
+
+    cursorTrailIndexRef.current += 1
+  }
+
   return (
     <main className={`min-h-screen lg:h-screen lg:overflow-hidden ${isLightTheme ? 'light-theme bg-[#cdd6b6] text-[#24281f]' : 'bg-[#111315] text-slate-100'}`}>
-      {showWelcome ? <WelcomeScreen onEnter={() => setShowWelcome(false)} /> : null}
-      <div className="mx-auto flex min-h-screen max-w-[1528px] flex-col lg:grid lg:h-full lg:min-h-0 lg:grid-cols-[340px_minmax(0,1fr)_40px]">
+      {showWelcome ? (
+        <WelcomeScreen
+          onEnter={handleEnterPortfolio}
+          isExiting={isEnteringPortfolio}
+        />
+      ) : null}
+      <div className={`mx-auto flex min-h-screen max-w-[1528px] flex-col lg:grid lg:h-full lg:min-h-0 lg:grid-cols-[340px_minmax(0,1fr)_40px] ${
+        isEnteringPortfolio ? 'portfolio-entering' : 'portfolio-entered'
+      }`}>
         <Sidebar
           sections={sections}
           socials={socials}
@@ -145,11 +260,21 @@ function App() {
         <section
           onMouseMove={(event) => {
             const rect = event.currentTarget.getBoundingClientRect()
+            const nextX = event.clientX - rect.left
+            const nextY = event.clientY - rect.top
+            const lastPoint = lastTrailPointRef.current
+            const distance = Math.hypot(nextX - lastPoint.x, nextY - lastPoint.y)
+
             setCursorPosition({
-              x: event.clientX - rect.left,
-              y: event.clientY - rect.top,
+              x: nextX,
+              y: nextY,
               active: true,
             })
+
+            if (distance > 42) {
+              spawnCursorSymbol(nextX, nextY)
+              lastTrailPointRef.current = { x: nextX, y: nextY }
+            }
           }}
           onMouseLeave={() => {
             setCursorPosition((current) => ({ ...current, active: false }))
@@ -165,22 +290,32 @@ function App() {
           }`}
         >
           <div className="hidden h-full lg:block">
-            <div
-              aria-hidden="true"
-              className={`page-cursor-glow ${cursorPosition.active ? 'opacity-100' : 'opacity-0'}`}
-              style={{ left: `${cursorPosition.x}px`, top: `${cursorPosition.y}px` }}
-            />
-            <div className="relative flex h-full min-h-0 flex-col">
-              <SectionHeader
-                eyebrow={currentSection.eyebrow}
-                title={currentSection.title}
-                ghostWord={currentSection.ghostWord}
-                accentText={currentSection.accentText}
-                theme={theme}
-              />
+            {Array.from({ length: 10 }, (_, trail) => (
+              <span
+                key={trail}
+                ref={(node) => {
+                  cursorSymbolRefs.current[trail] = node
+                }}
+                aria-hidden="true"
+                className="page-cursor-symbol"
+              >
+                {cursorSymbols[trail % cursorSymbols.length]}
+              </span>
+            ))}
+            <div ref={desktopTransitionRef} className="relative flex h-full min-h-0 flex-col">
+              <div data-page-chrome>
+                <SectionHeader
+                  eyebrow={currentSection.eyebrow}
+                  title={currentSection.title}
+                  ghostWord={currentSection.ghostWord}
+                  accentText={currentSection.accentText}
+                  theme={theme}
+                />
+              </div>
               <div
                 key={currentSection.id}
-                className={`page-transition ${
+                data-page-body
+                className={`${
                   currentSection.id === 'skills' || currentSection.id === 'projects' ? 'min-h-0 flex-1' : 'flex-1'
                 }`}
               >
@@ -266,6 +401,7 @@ function App() {
         <RightRail
           theme={theme}
           onToggleTheme={toggleTheme}
+          onExitToWelcome={() => setShowWelcome(true)}
         />
 
       </div>

@@ -11,9 +11,9 @@ const getPanelObjectPosition = (panel) => panel.objectPosition ?? 'center center
 const getPanelImageScale = (panel) => panel.imageScale ?? 1
 
 const desktopSlots = [
-  { top: 72, left: 0, right: 0, height: 'calc(100% - 72px)', zIndex: 3, opacity: 1, scale: 1 },
-  { top: 40, left: 28, right: 28, height: 'calc(100% - 132px)', zIndex: 2, opacity: 0.9, scale: 1 },
-  { top: 18, left: 58, right: 58, height: 'calc(100% - 188px)', zIndex: 1, opacity: 0.68, scale: 1 },
+  { top: 96, left: 0, right: 0, height: 'calc(100% - 96px)', zIndex: 3, opacity: 1, scale: 1 },
+  { top: 58, left: 28, right: 28, height: 'calc(100% - 150px)', zIndex: 2, opacity: 0.9, scale: 1 },
+  { top: 30, left: 58, right: 58, height: 'calc(100% - 200px)', zIndex: 1, opacity: 0.68, scale: 1 },
 ]
 
 function ProjectsPage({ section }) {
@@ -200,10 +200,61 @@ function ProjectsPage({ section }) {
       movePanels(direction)
     }
 
+    const handlePointerMove = (event) => {
+      const rect = node.getBoundingClientRect()
+      const pointerX = ((event.clientX - rect.left) / rect.width) - 0.5
+      const pointerY = ((event.clientY - rect.top) / rect.height) - 0.5
+      const images = Array.from(node.querySelectorAll('.projects-preview-image'))
+      const frontImage = images[0]
+
+      if (!frontImage) {
+        return
+      }
+
+      const panelId = frontImage.closest('[data-panel-id]')?.getAttribute('data-panel-id')
+      const panel = panelOrderRef.current.find((item) => item.id === panelId)
+      const baseScale = getPanelImageScale(panel)
+
+      gsap.to(frontImage, {
+        x: pointerX * 14,
+        y: pointerY * 20,
+        scale: baseScale + 0.02,
+        duration: 0.42,
+        ease: 'power3.out',
+        overwrite: 'auto',
+      })
+    }
+
+    const resetPointerMove = () => {
+      const images = Array.from(node.querySelectorAll('.projects-preview-image'))
+      const frontImage = images[0]
+
+      if (!frontImage) {
+        return
+      }
+
+      const panelId = frontImage.closest('[data-panel-id]')?.getAttribute('data-panel-id')
+      const panel = panelOrderRef.current.find((item) => item.id === panelId)
+      const baseScale = getPanelImageScale(panel)
+
+      gsap.to(frontImage, {
+        x: 0,
+        y: 0,
+        scale: baseScale,
+        duration: 0.55,
+        ease: 'power3.out',
+        overwrite: 'auto',
+      })
+    }
+
     node.addEventListener('wheel', handleWheel, { passive: false })
+    node.addEventListener('pointermove', handlePointerMove)
+    node.addEventListener('pointerleave', resetPointerMove)
 
     return () => {
       node.removeEventListener('wheel', handleWheel)
+      node.removeEventListener('pointermove', handlePointerMove)
+      node.removeEventListener('pointerleave', resetPointerMove)
     }
   }, [isMobile, panelOrder])
 
@@ -215,7 +266,7 @@ function ProjectsPage({ section }) {
       <div
         key={panel.id}
         data-panel-id={panel.id}
-        className="projects-loop-item absolute overflow-hidden"
+        className="projects-loop-item absolute overflow-hidden rounded-t-[1.5rem]"
         style={{
           top: `${slot.top}px`,
           left: `${slot.left ?? 0}px`,
@@ -254,9 +305,9 @@ function ProjectsPage({ section }) {
   })
 
   return (
-    <div className="relative flex h-full flex-col">
-      <div className="w-full pt-8 pb-4">
-        <div className="w-full max-w-[48rem] px-5 py-4">
+    <div className="relative flex h-full min-h-0 flex-col">
+      <div className="w-full shrink-0 pt-6 pb-3">
+        <div className="w-full max-w-[48rem] px-5 py-3">
           {section.description ? (
             <p className="max-w-[36rem] text-left text-base leading-8 text-slate-300">
               {section.description}
@@ -265,7 +316,7 @@ function ProjectsPage({ section }) {
         </div>
       </div>
 
-      <div className="relative min-h-0 flex-1 px-0 md:px-5">
+      <div className="relative min-h-[24rem] min-h-0 flex-1 px-0 md:px-5">
         {isMobile ? (
           <div className="w-full">
             {basePanels.map((panel, index) => (
@@ -273,7 +324,7 @@ function ProjectsPage({ section }) {
                 key={panel.id}
                 type="button"
                 onClick={() => setZoomedPanel(panel.src)}
-                className="relative block h-[78svh] w-full overflow-hidden text-left"
+                className="relative block h-[82svh] w-full overflow-hidden rounded-t-[1.5rem] text-left"
                 aria-label={`Open project preview ${index + 1}`}
               >
                 <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start px-4 pt-3">
@@ -300,7 +351,7 @@ function ProjectsPage({ section }) {
         ) : (
           <div
             ref={previewRef}
-            className="relative h-full overflow-hidden"
+            className="relative h-full min-h-0 overflow-hidden"
             style={{ touchAction: 'pan-y', overscrollBehaviorY: 'contain' }}
           >
             {desktopPanelNodes}
@@ -310,7 +361,6 @@ function ProjectsPage({ section }) {
 
       <div className="pointer-events-none absolute inset-x-0 bottom-10 z-40 hidden justify-center transition duration-300 md:flex opacity-100">
         <div className="projects-scroll-indicator flex items-center gap-2 font-dm-mono text-[0.62rem] uppercase tracking-[0.22em] text-white/52">
-          <span className="text-white/42">↓</span>
           <span>Scroll to view</span>
         </div>
       </div>
@@ -355,3 +405,4 @@ function ProjectsPage({ section }) {
 }
 
 export default ProjectsPage
+

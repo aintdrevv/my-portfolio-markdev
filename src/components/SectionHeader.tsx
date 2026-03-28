@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import gsap from 'gsap'
+import { useEffect, useRef, useState } from 'react'
 
 function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
   const [currentTime, setCurrentTime] = useState(() =>
@@ -10,6 +11,8 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
       timeZone: 'Asia/Manila',
     }).format(new Date()),
   )
+  const [displayGhostWord, setDisplayGhostWord] = useState(ghostWord)
+  const scrambleFrameRef = useRef(null)
   const accentIndex = accentText ? title.toLowerCase().indexOf(accentText.toLowerCase()) : -1
   const beforeAccent = accentIndex >= 0 ? title.slice(0, accentIndex) : title
   const highlightedAccent =
@@ -35,10 +38,53 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
     return () => window.clearInterval(intervalId)
   }, [])
 
+  useEffect(() => {
+    const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    const state = { progress: 0 }
+
+    if (scrambleFrameRef.current) {
+      scrambleFrameRef.current.kill()
+    }
+
+    scrambleFrameRef.current = gsap.to(state, {
+      progress: ghostWord.length,
+      duration: 1.18,
+      ease: 'power2.out',
+      onUpdate: () => {
+        const revealCount = Math.floor(state.progress)
+        const nextWord = ghostWord
+          .split('')
+          .map((char, index) => {
+            if (char === ' ') {
+              return ' '
+            }
+
+            if (index < revealCount) {
+              return ghostWord[index]
+            }
+
+            return glyphs[Math.floor(Math.random() * glyphs.length)]
+          })
+          .join('')
+
+        setDisplayGhostWord(nextWord)
+      },
+      onComplete: () => {
+        setDisplayGhostWord(ghostWord)
+      },
+    })
+
+    return () => {
+      if (scrambleFrameRef.current) {
+        scrambleFrameRef.current.kill()
+      }
+    }
+  }, [ghostWord])
+
   return (
-    <div className="relative px-1 py-1 pb-6 lg:py-2 lg:pb-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
-        <div className="max-w-4xl">
+    <div className="relative px-1 py-1 pb-6 lg:min-h-[9.5rem] lg:py-2 lg:pb-8">
+      <div className="flex flex-col gap-4 lg:min-h-[7.5rem] lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+        <div className="max-w-4xl lg:min-h-[7.5rem]">
           <div className="flex items-center gap-3">
             <p className={`font-dm-mono text-[10px] uppercase tracking-[0.28em] ${
               isLightTheme ? 'text-[#5f6850]' : 'text-white/30'
@@ -48,16 +94,16 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
             <span className={`h-px w-10 ${isLightTheme ? 'bg-[#7f886f]' : 'bg-white/30'}`} />
           </div>
 
-          <div className="relative mt-4 lg:mt-5">
+          <div className="mt-4 flex flex-col gap-2 lg:mt-5">
             <p
               aria-hidden="true"
-              className={`font-bebas pointer-events-none select-none text-[52px] leading-none uppercase tracking-[0.08em] sm:text-[64px] md:text-[80px] lg:text-[88px] ${
-                isLightTheme ? 'text-[#93a66b]/10' : 'text-white/[0.055]'
+              className={`font-bebas pointer-events-none select-none text-[38px] leading-[0.9] uppercase tracking-[0.08em] sm:text-[46px] md:text-[56px] lg:text-[68px] ${
+                isLightTheme ? 'text-[#93a66b]/16' : 'text-white/[0.08]'
               }`}
             >
-              {ghostWord}
+              {displayGhostWord}
             </p>
-            <h2 className={`font-space-grotesk relative z-10 -mt-3 max-w-[18ch] text-[22px] leading-[1.05] font-medium tracking-[-0.04em] sm:text-[24px] md:text-[28px] lg:-mt-4 lg:text-[30px] ${
+            <h2 className={`font-space-grotesk relative z-10 max-w-[18ch] text-[22px] leading-[1.05] font-medium tracking-[-0.04em] sm:text-[24px] md:text-[28px] lg:text-[30px] ${
               isLightTheme ? 'text-[#24281f]' : 'text-white/88'
             }`}>
               {accentIndex >= 0 ? (
@@ -75,15 +121,13 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
           </div>
         </div>
 
-        <div className="hidden shrink-0 items-center gap-3 lg:flex">
+        <div className="hidden shrink-0 items-center gap-4 lg:flex">
           <div className={`font-dm-mono text-[10px] uppercase tracking-[0.24em] ${
             isLightTheme ? 'text-[#5f6850]' : 'text-white/34'
           }`}>
             {currentTime} GMT+8
           </div>
-          <div className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.26em] ${
-            isLightTheme ? 'bg-[rgba(93,111,63,0.08)] text-[#93a66b]' : 'bg-white/[0.05] text-[#93a66b]'
-          }`}>
+          <div className="text-[#93a66b] text-xs uppercase tracking-[0.26em]">
             Portfolio
           </div>
         </div>
