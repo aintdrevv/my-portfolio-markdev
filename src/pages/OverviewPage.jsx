@@ -1,7 +1,19 @@
 import SectionFooterCards from '../components/SectionFooterCards'
-import TaggedPoint from '../components/TaggedPoint'
 
-function OverviewPage({ section, sliderCopies, toolIcons }) {
+function TaggedPoint({ tag, text }) {
+  return (
+    <div className="ml-auto flex h-full w-[92%] items-center border-l-4 border-white/18 bg-white/[0.025] px-6 py-6">
+      <div className="space-y-4">
+        <span className="inline-flex border border-white/14 bg-white/[0.04] px-3 py-1 text-[0.62rem] uppercase tracking-[0.22em] text-white/65">
+          {tag}
+        </span>
+        <p className="text-base leading-8 text-slate-300">{text}</p>
+      </div>
+    </div>
+  )
+}
+
+function OverviewPage({ section, sliderCopies, toolIcons, theme }) {
   return (
     <div className="flex h-full flex-col">
       <div className="grid flex-1 grid-cols-[1.1fr_0.9fr] gap-8 py-8">
@@ -26,7 +38,7 @@ function OverviewPage({ section, sliderCopies, toolIcons }) {
                 toolIcons.map((tool, index) => (
                   <div
                     key={`${copy}-${tool.name}-${index}`}
-                    className="flex h-14 w-14 shrink-0 items-center justify-center text-slate-200"
+                    className="flex h-14 w-14 shrink-0 items-center justify-center text-[#93a66b]"
                     aria-label={tool.name}
                     title={tool.name}
                   >
@@ -39,7 +51,7 @@ function OverviewPage({ section, sliderCopies, toolIcons }) {
         </div>
       </div>
 
-      <SectionFooterCards />
+      <SectionFooterCards theme={theme} />
     </div>
   )
 }

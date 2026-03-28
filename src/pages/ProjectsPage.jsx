@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 
+const previewPanels = [
+  '/project-placeholder-black.svg',
+  '/project-placeholder-blue.svg',
+  '/project-placeholder-violet.svg',
+]
+
 function ProjectsPage({ section }) {
-  const previewPanels = [
-    '/project-placeholder-black.svg',
-    '/project-placeholder-blue.svg',
-    '/project-placeholder-violet.svg',
-  ]
   const projectLabels = section.projects?.map((project) => project.tech?.slice(0, 3).join(' / ')) ?? []
   const previewRef = useRef(null)
   const panelRefs = useRef([])
@@ -81,9 +82,11 @@ function ProjectsPage({ section }) {
     <div className="flex h-full flex-col">
       <div className="w-full pt-8 pb-4">
         <div className="w-full max-w-[48rem] px-5 py-4">
-          <p className="max-w-[36rem] text-left text-base leading-8 text-slate-300">
-            {section.description}
-          </p>
+          {section.description ? (
+            <p className="max-w-[36rem] text-left text-base leading-8 text-slate-300">
+              {section.description}
+            </p>
+          ) : null}
         </div>
       </div>
 

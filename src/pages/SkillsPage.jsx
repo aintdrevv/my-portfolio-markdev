@@ -1,6 +1,6 @@
 import SectionFooterCards from '../components/SectionFooterCards'
 
-function SkillsPage({ section }) {
+function SkillsPage({ section, theme }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 overflow-hidden">
@@ -203,7 +203,7 @@ function SkillsPage({ section }) {
         </div>
       </div>
 
-      <SectionFooterCards />
+      <SectionFooterCards theme={theme} />
     </div>
   )
 }

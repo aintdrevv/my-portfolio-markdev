@@ -1,72 +1,117 @@
+import { useState } from 'react'
 import SectionFooterCards from '../components/SectionFooterCards'
 
-function ContactPage({ section }) {
-  return (
-    <>
-      <div className="grid flex-1 grid-cols-1 gap-8 py-8">
-        <div className="w-full py-4">
-          <p className="text-center text-sm leading-7 text-slate-300">{section.description}</p>
-        </div>
+function ContactPage({ section, theme }) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [subject, setSubject] = useState('')
+  const [message, setMessage] = useState('')
 
-        <div className="mx-auto mt-6 w-full max-w-[42rem] bg-white/[0.03] p-5">
-          <div className="flex items-center justify-between border-b border-white/8 pb-4">
+  const handleSend = () => {
+    const trimmedName = name.trim()
+    const trimmedEmail = email.trim()
+    const trimmedSubject = subject.trim()
+    const trimmedMessage = message.trim()
+
+    if (!trimmedMessage) {
+      return
+    }
+
+    const body = [
+      trimmedName ? `Name: ${trimmedName}` : null,
+      trimmedEmail ? `Email: ${trimmedEmail}` : null,
+      '',
+      trimmedMessage,
+    ]
+      .filter(Boolean)
+      .join('\n')
+
+    const mailtoUrl = `mailto:itsmarkmacaraig@gmail.com?subject=${encodeURIComponent(trimmedSubject || 'Portfolio Inquiry')}&body=${encodeURIComponent(body)}`
+    window.location.href = mailtoUrl
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex flex-1 flex-col py-8">
+        <div className="contact-form-panel mx-auto my-auto w-full max-w-[42rem] p-6">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div>
-              <p className="text-sm font-medium text-white">Inbox</p>
+              <p className="text-sm font-medium text-white">Contact Form</p>
               <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-500">
-                Chat Style Contact
+                Professional Inquiry
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-300/70" />
+              <span className="h-2.5 w-2.5 rounded-full bg-white/50" />
               <span className="text-xs uppercase tracking-[0.16em] text-slate-500">Available</span>
             </div>
           </div>
 
-          <div className="space-y-4 py-5">
-            <div className="flex justify-start">
-              <div className="max-w-[78%] rounded-[1.5rem] rounded-bl-sm bg-black/25 px-4 py-3 text-sm leading-7 text-slate-300">
-                Hi Mark, I would like to ask about your frontend work and availability.
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <div className="max-w-[74%] rounded-[1.5rem] rounded-br-sm bg-cyan-300/12 px-4 py-3 text-sm leading-7 text-cyan-50">
-                You can send your message here and I will get back to you as soon as possible.
-              </div>
-            </div>
-
-            <div className="flex justify-start">
-              <div className="max-w-[70%] rounded-[1.5rem] rounded-bl-sm bg-black/25 px-4 py-3 text-sm leading-7 text-slate-300">
-                Available through {section.items.join(', ')}.
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-white/8 pt-4">
-            <div className="rounded-[1.6rem] bg-black/25 px-4 py-3">
-              <p className="text-[0.68rem] uppercase tracking-[0.2em] text-slate-500">
-                New Message
-              </p>
-              <div className="mt-3 flex items-end gap-3">
-                <textarea
-                  rows="3"
-                  placeholder="Type your message here..."
-                  className="min-h-[4.5rem] flex-1 resize-none bg-transparent text-sm leading-7 text-slate-200 outline-none placeholder:text-slate-500"
+          <div className="grid gap-4 py-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="grid gap-2">
+                <span className="text-[0.68rem] uppercase tracking-[0.2em] text-slate-500">Name</span>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Your name"
+                  className="border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/20"
                 />
-                <button
-                  type="button"
-                  className="inline-flex h-11 items-center rounded-full bg-white/[0.08] px-5 text-sm text-slate-200 transition hover:bg-white/[0.12] hover:text-white"
-                >
-                  Send
-                </button>
-              </div>
+              </label>
+
+              <label className="grid gap-2">
+                <span className="text-[0.68rem] uppercase tracking-[0.2em] text-slate-500">Email</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  className="border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/20"
+                />
+              </label>
+            </div>
+
+            <label className="grid gap-2">
+              <span className="text-[0.68rem] uppercase tracking-[0.2em] text-slate-500">Subject</span>
+              <input
+                type="text"
+                value={subject}
+                onChange={(event) => setSubject(event.target.value)}
+                placeholder="Project inquiry"
+                className="border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/20"
+              />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-[0.68rem] uppercase tracking-[0.2em] text-slate-500">Message</span>
+              <textarea
+                rows="6"
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+                placeholder="Write your message here..."
+                className="min-h-[10rem] resize-none border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-7 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-white/20"
+              />
+            </label>
+
+            <div className="flex items-center justify-between gap-4 border-t border-white/10 pt-4">
+              <p className="text-sm leading-6 text-slate-400">
+                Available through {section.items.join(', ')}.
+              </p>
+              <button
+                type="button"
+                onClick={handleSend}
+                className="inline-flex h-11 items-center border border-white/12 bg-white/[0.04] px-5 text-sm text-slate-100 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              >
+                Submit
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <SectionFooterCards />
-    </>
+      <SectionFooterCards theme={theme} />
+    </div>
   )
 }
 
