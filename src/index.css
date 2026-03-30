@@ -115,6 +115,27 @@ body {
   will-change: transform, opacity;
 }
 
+.bento-card-spotlight-mask {
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bento-card-surface {
+  position: absolute;
+  inset: 1px;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  transition: background-color 300ms ease;
+}
+
+.group:hover .bento-card-surface {
+  background: rgba(0, 0, 0, 0.28);
+}
+
 .bento-card-spotlight {
   position: absolute;
   left: 0;
@@ -222,6 +243,10 @@ body {
 .light-theme .content-surface [class*="bg-white/[0.05"],
 .light-theme .content-surface [class*="bg-white/[0.06"] {
   background-color: rgba(147, 166, 107, 0.07) !important;
+}
+
+.light-theme .content-surface .bento-card-surface {
+  background: rgba(236, 240, 226, 0.82);
 }
 
 .light-theme .content-surface .contact-form-panel {

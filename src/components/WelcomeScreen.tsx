@@ -10,6 +10,7 @@ const welcomeImages = [
 
 const imagePositions = ['center center', 'center 40%', 'center center', 'center 30%']
 const cursorSymbols = ['+', 'x', 'o', '::', '/']
+const welcomeImageBaseScale = 1
 
 function WelcomeScreen({ onEnter, isExiting = false }) {
   const marqueeImages = [...welcomeImages, ...welcomeImages]
@@ -183,28 +184,17 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
         ease: 'elastic.out(1, 0.7)',
       }, '-=1.02')
 
-      timeline.fromTo('[data-welcome-image]', {
+      timeline.fromTo('[data-welcome-image] img', {
         y: 64,
-        scale: 1.08,
+        scale: welcomeImageBaseScale + 0.08,
       }, {
         y: 0,
-        scale: 1,
+        scale: welcomeImageBaseScale,
         duration: 0.8,
         ease: 'back.out(1.45)',
         stagger: 0.05,
       }, '-=0.82')
 
-      gsap.to('[data-welcome-image]', {
-        y: (index) => (index % 2 === 0 ? -10 : 10),
-        duration: 3.6,
-        ease: 'sine.inOut',
-        repeat: -1,
-        yoyo: true,
-        stagger: {
-          each: 0.12,
-          from: 'start',
-        },
-      })
     }, rootRef)
 
     return () => ctx.revert()
@@ -224,56 +214,57 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
     const originX = buttonRect.left - rootRect.left + (buttonRect.width / 2)
     const originY = buttonRect.top - rootRect.top + (buttonRect.height / 2)
 
-    const palette = ['#ffffff', '#93a66b', '#f4d58d']
-    const particles = Array.from({ length: 10 }, (_, index) => {
+    const palette = ['#93a66b', '#7d8d5a', '#c8d5a8', '#ffffff']
+    const clusterAnchors = [
+      { angle: -132, spread: 18, strength: 54 },
+      { angle: -92, spread: 22, strength: 42 },
+      { angle: -38, spread: 16, strength: 48 },
+      { angle: 18, spread: 20, strength: 44 },
+      { angle: 72, spread: 18, strength: 50 },
+    ]
+    const particles = Array.from({ length: 13 }, (_, index) => {
       const particle = document.createElement('span')
-      const angle = (-95 + ((190 / 9) * index)) * (Math.PI / 180)
-      const distance = 34 + ((index % 3) * 10)
-      const size = 4 + (index % 3)
+      const cluster = clusterAnchors[index % clusterAnchors.length]
+      const angle = (cluster.angle + gsap.utils.random(-cluster.spread, cluster.spread)) * (Math.PI / 180)
+      const distance = cluster.strength + gsap.utils.random(-10, 14)
+      const isBlob = index % 4 !== 3
+      const width = isBlob ? gsap.utils.random(10, 22) : gsap.utils.random(4, 7)
+      const height = isBlob ? gsap.utils.random(9, 20) : gsap.utils.random(18, 30)
       const color = palette[index % palette.length]
+      const dx = Math.cos(angle) * distance
+      const dy = Math.sin(angle) * distance
+      const driftX = dx + gsap.utils.random(-10, 12)
+      const driftY = dy + gsap.utils.random(14, 30)
+      const launchX = buttonRect.width * gsap.utils.random(0.14, 0.86)
+      const launchY = buttonRect.height * gsap.utils.random(0.24, 0.78)
 
       particle.style.position = 'absolute'
-      particle.style.left = `${originX}px`
-      particle.style.top = `${originY}px`
-      particle.style.width = `${size}px`
-      particle.style.height = `${size}px`
-      particle.style.borderRadius = '999px'
+      particle.style.left = `${buttonRect.left - rootRect.left + launchX}px`
+      particle.style.top = `${buttonRect.top - rootRect.top + launchY}px`
+      particle.style.width = `${width}px`
+      particle.style.height = `${height}px`
+      particle.style.borderRadius = isBlob
+        ? `${gsap.utils.random(34, 58)}% ${gsap.utils.random(46, 70)}% ${gsap.utils.random(32, 56)}% ${gsap.utils.random(42, 66)}%`
+        : '999px'
       particle.style.pointerEvents = 'none'
-      particle.style.background = color
-      particle.style.boxShadow = `0 0 12px ${color}, 0 0 20px ${color}55`
+      particle.style.background = isBlob
+        ? `radial-gradient(circle at 28% 24%, rgba(255,255,255,0.38) 0%, ${color} 36%, ${color}ee 100%)`
+        : `linear-gradient(180deg, rgba(255,255,255,0.75) 0%, ${color} 100%)`
+      particle.style.boxShadow = `0 0 10px ${color}22`
       particle.style.opacity = '0'
-      particle.style.transform = 'translate(-50%, -50%) scale(0.4)'
-      particle.dataset.dx = String(Math.cos(angle) * distance)
-      particle.dataset.dy = String(Math.sin(angle) * distance)
+      particle.style.transform = 'translate(-50%, -50%) scale(0.4) rotate(0deg)'
+      particle.dataset.dx = String(dx)
+      particle.dataset.dy = String(dy)
+      particle.dataset.driftX = String(driftX)
+      particle.dataset.driftY = String(driftY)
+      particle.dataset.rotation = String(gsap.utils.random(-28, 28))
       particlesRoot.appendChild(particle)
       return particle
-    })
-
-    const trails = particles.map((particle, index) => {
-      const trail = document.createElement('span')
-      const color = palette[index % palette.length]
-      trail.style.position = 'absolute'
-      trail.style.left = `${originX}px`
-      trail.style.top = `${originY}px`
-      trail.style.width = '24px'
-      trail.style.height = '2px'
-      trail.style.borderRadius = '999px'
-      trail.style.pointerEvents = 'none'
-      trail.style.opacity = '0'
-      trail.style.transformOrigin = '0% 50%'
-      trail.style.background = `linear-gradient(90deg, ${color}b3 0%, ${color}4d 45%, transparent 100%)`
-      trail.style.filter = 'blur(0.5px)'
-      trail.dataset.dx = particle.dataset.dx ?? '0'
-      trail.dataset.dy = particle.dataset.dy ?? '0'
-      trail.dataset.rotation = `${Math.atan2(Number(trail.dataset.dy), Number(trail.dataset.dx)) * (180 / Math.PI)}`
-      particlesRoot.appendChild(trail)
-      return trail
     })
 
     const timeline = gsap.timeline({
       onComplete: () => {
         particles.forEach((particle) => particle.remove())
-        trails.forEach((trail) => trail.remove())
         onEnter()
       },
     })
@@ -285,53 +276,44 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
     })
 
     timeline.to(button, {
+      boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.18), 0 0 28px rgba(223, 233, 243, 0.24)',
+      duration: 0.12,
+      ease: 'power2.out',
+    }, 0)
+
+    timeline.to(button, {
       scale: 1,
       duration: 0.42,
       ease: 'elastic.out(1, 0.55)',
     }, '>')
 
+    timeline.to(button, {
+      boxShadow: 'none',
+      duration: 0.28,
+      ease: 'power2.out',
+    }, 0.12)
+
     timeline.to(particles, {
       autoAlpha: 1,
       scale: 1,
+      rotation: (_, element) => Number(element.dataset.rotation ?? 0),
       x: (_, element) => Number(element.dataset.dx ?? 0),
       y: (_, element) => Number(element.dataset.dy ?? 0),
-      duration: 0.34,
-      ease: 'power3.out',
-      stagger: 0.008,
+      duration: 0.28,
+      ease: 'power2.out',
+      stagger: 0.01,
     }, 0)
 
-    timeline.fromTo(trails, {
-      autoAlpha: 0,
-      scaleX: 0.2,
-      rotation: (_, element) => Number(element.dataset.rotation ?? 0),
-      x: 0,
-      y: 0,
-    }, {
-      autoAlpha: 0.95,
-      scaleX: 1,
-      rotation: (_, element) => Number(element.dataset.rotation ?? 0),
-      x: (_, element) => Number(element.dataset.dx ?? 0) * 0.45,
-      y: (_, element) => Number(element.dataset.dy ?? 0) * 0.45,
-      duration: 0.18,
-      ease: 'power2.out',
-      stagger: 0.006,
-    }, 0.02)
-
     timeline.to(particles, {
-      y: (_, element) => Number(element.dataset.dy ?? 0) + 12,
+      x: (_, element) => Number(element.dataset.driftX ?? 0),
+      y: (_, element) => Number(element.dataset.driftY ?? 0),
+      rotation: (_, element) => Number(element.dataset.rotation ?? 0) * 1.6,
       autoAlpha: 0,
-      duration: 0.3,
+      scale: (_, element) => (Number(element.dataset.rotation ?? 0) === 0 ? 0.82 : 0.68),
+      duration: 0.48,
       ease: 'power2.in',
-      stagger: 0.005,
-    }, 0.16)
-
-    timeline.to(trails, {
-      autoAlpha: 0,
-      scaleX: 1.06,
-      duration: 0.22,
-      ease: 'power2.in',
-      stagger: 0.004,
-    }, 0.14)
+      stagger: 0.01,
+    }, 0.1)
   }
 
   const spawnCursorSymbol = (x, y) => {
@@ -386,7 +368,23 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
       return
     }
 
-    const rect = marquee.getBoundingClientRect()
+    const hoveredFrame = event.target instanceof Element
+      ? event.target.closest('[data-welcome-image]')
+      : null
+
+    if (!hoveredFrame) {
+      resetMarqueeParallax()
+      return
+    }
+
+    const hoveredImage = hoveredFrame.querySelector('img')
+
+    if (!hoveredImage) {
+      resetMarqueeParallax()
+      return
+    }
+
+    const rect = hoveredFrame.getBoundingClientRect()
     const pointerX = ((event.clientX - rect.left) / rect.width) - 0.5
     const pointerY = ((event.clientY - rect.top) / rect.height) - 0.5
 
@@ -395,12 +393,24 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
         return
       }
 
+      if (image !== hoveredImage) {
+        gsap.to(image, {
+          x: 0,
+          y: 0,
+          scale: welcomeImageBaseScale,
+          duration: 0.35,
+          ease: 'power3.out',
+          overwrite: 'auto',
+        })
+        return
+      }
+
       const depth = 1 + ((index % welcomeImages.length) * 0.22)
 
       gsap.to(image, {
-        x: pointerX * 22 * depth,
-        y: pointerY * 30 * depth,
-        scale: 1.03 + (depth * 0.012),
+        x: pointerX * 18 * depth,
+        y: 0,
+        scale: welcomeImageBaseScale + 0.03 + (depth * 0.012),
         duration: 0.55,
         ease: 'power3.out',
         overwrite: 'auto',
@@ -417,7 +427,7 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
       gsap.to(image, {
         x: 0,
         y: 0,
-        scale: 1,
+        scale: welcomeImageBaseScale,
         duration: 0.7,
         ease: 'power3.out',
         overwrite: 'auto',

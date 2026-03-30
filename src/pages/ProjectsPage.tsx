@@ -12,9 +12,13 @@ const getPanelImageScale = (panel) => panel.imageScale ?? 1
 
 const desktopSlots = [
   { top: 96, left: 0, right: 0, height: 'calc(100% - 96px)', zIndex: 3, opacity: 1, scale: 1 },
-  { top: 58, left: 28, right: 28, height: 'calc(100% - 150px)', zIndex: 2, opacity: 0.9, scale: 1 },
+  { top: 58, left: 28, right: 28, height: 'calc(100% - 150px)', zIndex: 2, opacity: 0.96, scale: 1 },
   { top: 30, left: 58, right: 58, height: 'calc(100% - 200px)', zIndex: 1, opacity: 0.68, scale: 1 },
 ]
+
+const PANEL_SHIFT_DURATION = 0.48
+const PANEL_SHIFT_OFFSET = 0.14
+const PANEL_SETTLE_DURATION = 0.22
 
 function ProjectsPage({ section }) {
   const projectLabels = basePanels.map((_, index) => (
@@ -24,6 +28,9 @@ function ProjectsPage({ section }) {
   const wheelDeltaRef = useRef(0)
   const isAnimatingRef = useRef(false)
   const panelOrderRef = useRef(basePanels)
+  const moveTimelineRef = useRef(null)
+  const settleTimelineRef = useRef(null)
+  const pendingSettleDirectionRef = useRef(null)
   const [zoomedPanel, setZoomedPanel] = useState(null)
   const [isMobile, setIsMobile] = useState(() => (
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
@@ -33,6 +40,106 @@ function ProjectsPage({ section }) {
   useEffect(() => {
     panelOrderRef.current = panelOrder
   }, [panelOrder])
+
+  useEffect(() => () => {
+    moveTimelineRef.current?.kill()
+    settleTimelineRef.current?.kill()
+    wheelDeltaRef.current = 0
+    isAnimatingRef.current = false
+    panelOrderRef.current = basePanels
+  }, [])
+
+  useEffect(() => {
+    const node = previewRef.current
+
+    if (!node || isMobile) {
+      return undefined
+    }
+
+    const direction = pendingSettleDirectionRef.current
+
+    if (!direction) {
+      return undefined
+    }
+
+    pendingSettleDirectionRef.current = null
+    settleTimelineRef.current?.kill()
+
+    const reorderedItems = Array.from(node.querySelectorAll('.projects-loop-item'))
+    const reorderedImages = Array.from(node.querySelectorAll('.projects-preview-image'))
+
+    reorderedItems.forEach((item, index) => {
+      const slot = desktopSlots[index] ?? desktopSlots[desktopSlots.length - 1]
+
+      gsap.set(item, {
+        top: slot.top,
+        left: slot.left ?? 0,
+        right: slot.right ?? 0,
+        height: slot.height,
+        opacity: slot.opacity,
+        scale: slot.scale ?? 1,
+        zIndex: slot.zIndex,
+        x: 0,
+        y: 0,
+        yPercent: 0,
+      })
+    })
+
+    reorderedImages.forEach((image) => {
+      const panelId = image.closest('[data-panel-id]')?.getAttribute('data-panel-id')
+      const panel = panelOrderRef.current.find((item) => item.id === panelId)
+
+      gsap.set(image, {
+        x: 0,
+        y: 0,
+        yPercent: 0,
+        scale: getPanelImageScale(panel),
+      })
+    })
+
+    if (direction > 0) {
+      const backItem = reorderedItems[reorderedItems.length - 1]
+
+      if (!backItem) {
+        isAnimatingRef.current = false
+        return undefined
+      }
+
+      gsap.set(backItem, {
+        yPercent: 24,
+        autoAlpha: desktopSlots[desktopSlots.length - 1].opacity,
+      })
+
+      settleTimelineRef.current = gsap.to(backItem, {
+        yPercent: 0,
+        autoAlpha: desktopSlots[desktopSlots.length - 1].opacity,
+        duration: 0.46,
+        ease: 'power3.out',
+        clearProps: 'yPercent',
+        onComplete: () => {
+          isAnimatingRef.current = false
+        },
+      })
+
+      return undefined
+    }
+
+    settleTimelineRef.current = gsap.fromTo(reorderedItems, {
+      autoAlpha: (_, index) => (index === reorderedItems.length - 1 ? 0.78 : 1),
+      y: (_, index) => (index === reorderedItems.length - 1 ? 16 : 0),
+    }, {
+      autoAlpha: (_, index) => desktopSlots[index]?.opacity ?? 1,
+      y: 0,
+      duration: PANEL_SETTLE_DURATION,
+      ease: 'power2.out',
+      clearProps: 'y,yPercent',
+      onComplete: () => {
+        isAnimatingRef.current = false
+      },
+    })
+
+    return undefined
+  }, [isMobile, panelOrder])
 
   useEffect(() => {
     const handleResize = () => {
@@ -74,6 +181,7 @@ function ProjectsPage({ section }) {
       }
 
       const items = Array.from(node.querySelectorAll('.projects-loop-item'))
+      const images = Array.from(node.querySelectorAll('.projects-preview-image'))
       if (items.length < 2) {
         return
       }
@@ -88,14 +196,27 @@ function ProjectsPage({ section }) {
         : desktopSlots.slice(1, items.length)
 
       gsap.killTweensOf(items)
+      gsap.killTweensOf(images)
+
+      images.forEach((image) => {
+        const panelId = image.closest('[data-panel-id]')?.getAttribute('data-panel-id')
+        const panel = panelOrderRef.current.find((item) => item.id === panelId)
+
+        gsap.set(image, {
+          x: 0,
+          y: 0,
+          scale: getPanelImageScale(panel),
+        })
+      })
 
       const timeline = gsap.timeline({
         defaults: {
-          duration: 0.42,
-          ease: 'power2.inOut',
+          duration: PANEL_SHIFT_DURATION,
+          ease: 'power3.inOut',
           force3D: true,
         },
         onComplete: () => {
+          pendingSettleDirectionRef.current = direction
           setPanelOrder(() => {
             if (direction > 0) {
               return [...currentOrder.slice(1), currentOrder[0]]
@@ -103,36 +224,15 @@ function ProjectsPage({ section }) {
 
             return [currentOrder[currentOrder.length - 1], ...currentOrder.slice(0, -1)]
           })
-
-          if (direction < 0) {
-            isAnimatingRef.current = false
-            return
-          }
-
-          requestAnimationFrame(() => {
-            const reorderedItems = Array.from(node.querySelectorAll('.projects-loop-item'))
-            gsap.fromTo(reorderedItems, {
-              autoAlpha: (_, index) => (index === reorderedItems.length - 1 ? 0.72 : 1),
-              y: (_, index) => (index === reorderedItems.length - 1 ? 28 : 0),
-            }, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.28,
-              ease: 'power2.out',
-              clearProps: 'opacity,y,yPercent',
-              onComplete: () => {
-                isAnimatingRef.current = false
-              },
-            })
-          })
         },
       })
+      moveTimelineRef.current = timeline
 
       if (direction > 0) {
         timeline.to(outgoingItem, {
           yPercent: 110,
           autoAlpha: 1,
-          duration: 0.44,
+          duration: PANEL_SHIFT_DURATION,
           ease: 'power3.inOut',
           force3D: true,
         }, 0)
@@ -154,7 +254,7 @@ function ProjectsPage({ section }) {
           scale: slot.scale ?? 1,
           ease: 'power3.inOut',
           force3D: true,
-        }, direction < 0 ? 0.12 : 0.26)
+        }, PANEL_SHIFT_OFFSET)
       })
 
       if (direction < 0) {
@@ -176,11 +276,11 @@ function ProjectsPage({ section }) {
 
           timeline.to(recycledItem, {
             yPercent: 0,
-            duration: 0.52,
-            ease: 'power3.out',
+            duration: PANEL_SHIFT_DURATION + 0.08,
+            ease: 'power2.out',
             force3D: true,
             clearProps: 'yPercent',
-          }, 0)
+          }, PANEL_SHIFT_OFFSET)
         }
       }
 

@@ -9,8 +9,16 @@ function CellBar() {
   )
 }
 
+function CellSurface() {
+  return <div aria-hidden="true" className="bento-card-surface" />
+}
+
 function CellSpotlight() {
-  return <div aria-hidden="true" data-card-spotlight className="bento-card-spotlight" />
+  return (
+    <div aria-hidden="true" className="bento-card-spotlight-mask">
+      <div data-card-spotlight className="bento-card-spotlight" />
+    </div>
+  )
 }
 
 function Pill({ label }) {
@@ -27,9 +35,10 @@ function HeroCell({ title, description, pills, sub, className, containerRef, onM
       ref={containerRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className={`group relative flex min-h-[12.5rem] flex-col justify-between border border-white/8 bg-black/20 px-4 py-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 hover:bg-black/28 ${className}`}
+      className={`group relative flex min-h-[12.5rem] flex-col justify-between overflow-hidden border border-white/8 bg-transparent px-4 py-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 ${className}`}
     >
       <CellSpotlight />
+      <CellSurface />
       <CellBar />
       <div className="relative z-10">
         <div
@@ -58,9 +67,10 @@ function SkillCell({ label, sub, className, mini = false, containerRef, onMouseM
       ref={containerRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className={`group relative flex flex-col justify-end border border-white/8 bg-black/20 px-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:border-white/14 hover:bg-black/28 ${mini ? 'min-h-[3.25rem] py-2.5' : 'min-h-[4.75rem] py-3.5'} ${className}`}
+      className={`group relative flex flex-col justify-end overflow-hidden border border-white/8 bg-transparent px-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:border-white/14 ${mini ? 'min-h-[3.25rem] py-2.5' : 'min-h-[4.75rem] py-3.5'} ${className}`}
     >
       <CellSpotlight />
+      <CellSurface />
       <CellBar />
       <div className={`${mini ? 'text-[11px]' : 'text-[13px]'} relative z-10 font-space-grotesk font-medium text-white/70`}>
         {label}
@@ -78,9 +88,10 @@ function WideCell({ title, pills, sub, className, topAlign = false, containerRef
       ref={containerRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className={`group relative flex justify-between border border-white/8 bg-black/20 px-4 py-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 hover:bg-black/28 ${topAlign ? 'items-start' : 'items-end'} ${className}`}
+      className={`group relative flex justify-between overflow-hidden border border-white/8 bg-transparent px-4 py-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 ${topAlign ? 'items-start' : 'items-end'} ${className}`}
     >
       <CellSpotlight />
+      <CellSurface />
       <CellBar />
       <div className="relative z-10">
         <div
@@ -109,9 +120,10 @@ function MarqueeCell({ className, containerRef, onMouseMove, onMouseLeave }) {
       ref={containerRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className={`group relative flex min-h-[4.75rem] flex-col justify-between overflow-hidden border border-white/8 bg-black/20 px-4 py-3 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 hover:bg-black/28 ${className}`}
+      className={`group relative overflow-hidden flex min-h-[4.75rem] flex-col justify-between border border-white/8 bg-transparent px-4 py-3 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 ${className}`}
     >
       <CellSpotlight />
+      <CellSurface />
       <CellBar />
       <style>{`@keyframes skills-marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
       <div className="relative z-10 font-dm-mono text-[9px] uppercase tracking-[0.14em] text-white/45">
@@ -138,6 +150,8 @@ function MarqueeCell({ className, containerRef, onMouseMove, onMouseLeave }) {
 
 function SkillsPage() {
   const cellRefs = useRef([])
+  const cellMotionRef = useRef(new WeakMap())
+  const spotlightMotionRef = useRef(new WeakMap())
 
   useEffect(() => {
     const cells = cellRefs.current.filter(Boolean)
@@ -173,6 +187,35 @@ function SkillsPage() {
     cellRefs.current[index] = node
   }
 
+  const getCellMotion = (cell) => {
+    let motion = cellMotionRef.current.get(cell)
+
+    if (!motion) {
+      motion = {
+        xTo: gsap.quickTo(cell, 'x', { duration: 0.28, ease: 'power3.out' }),
+        yTo: gsap.quickTo(cell, 'y', { duration: 0.28, ease: 'power3.out' }),
+      }
+      cellMotionRef.current.set(cell, motion)
+    }
+
+    return motion
+  }
+
+  const getSpotlightMotion = (spotlight) => {
+    let motion = spotlightMotionRef.current.get(spotlight)
+
+    if (!motion) {
+      motion = {
+        xTo: gsap.quickTo(spotlight, 'x', { duration: 0.22, ease: 'power3.out' }),
+        yTo: gsap.quickTo(spotlight, 'y', { duration: 0.22, ease: 'power3.out' }),
+        opacityTo: gsap.quickTo(spotlight, 'autoAlpha', { duration: 0.22, ease: 'power3.out' }),
+      }
+      spotlightMotionRef.current.set(spotlight, motion)
+    }
+
+    return motion
+  }
+
   const handleCellMove = (event) => {
     const cell = event.currentTarget
     const rect = cell.getBoundingClientRect()
@@ -182,23 +225,15 @@ function SkillsPage() {
     const localX = event.clientX - rect.left
     const localY = event.clientY - rect.top
 
-    gsap.to(cell, {
-      x: pointerX * 10,
-      y: pointerY * 8,
-      duration: 0.28,
-      ease: 'power3.out',
-      overwrite: 'auto',
-    })
+    const cellMotion = getCellMotion(cell)
+    cellMotion.xTo(pointerX * 10)
+    cellMotion.yTo(pointerY * 8)
 
     if (spotlight) {
-      gsap.to(spotlight, {
-        x: localX,
-        y: localY,
-        autoAlpha: 1,
-        duration: 0.22,
-        ease: 'power3.out',
-        overwrite: 'auto',
-      })
+      const spotlightMotion = getSpotlightMotion(spotlight)
+      spotlightMotion.xTo(localX)
+      spotlightMotion.yTo(localY)
+      spotlightMotion.opacityTo(1)
     }
   }
 
@@ -206,21 +241,13 @@ function SkillsPage() {
     const cell = event.currentTarget
     const spotlight = cell.querySelector('[data-card-spotlight]')
 
-    gsap.to(cell, {
-      x: 0,
-      y: 0,
-      duration: 0.36,
-      ease: 'power3.out',
-      overwrite: 'auto',
-    })
+    const cellMotion = getCellMotion(cell)
+    cellMotion.xTo(0)
+    cellMotion.yTo(0)
 
     if (spotlight) {
-      gsap.to(spotlight, {
-        autoAlpha: 0,
-        duration: 0.28,
-        ease: 'power2.out',
-        overwrite: 'auto',
-      })
+      const spotlightMotion = getSpotlightMotion(spotlight)
+      spotlightMotion.opacityTo(0)
     }
   }
 
