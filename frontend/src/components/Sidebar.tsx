@@ -168,7 +168,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                     <div className={`my-1 h-px ${isLightTheme ? 'bg-[rgba(36,40,31,0.08)]' : 'bg-white/8'}`} />
                   </div>
                   <a
-                    href="/markdev-portfolio.pdf"
+                    href="/Dev.pdf"
                     target="_blank"
                     rel="noreferrer"
                     onClick={() => setMenuOpen(false)}
