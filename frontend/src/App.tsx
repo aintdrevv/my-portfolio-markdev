@@ -29,7 +29,6 @@ function App() {
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
   ))
   const [showMobileNavLinks, setShowMobileNavLinks] = useState(true)
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0, active: false })
   const mobileSectionRefs = useRef({})
   const mobileNavHideTimeoutRef = useRef(null)
   const desktopTransitionRef = useRef(null)
@@ -97,7 +96,6 @@ function App() {
 
   useEffect(() => {
     if (!isMobile) {
-      setShowMobileNavLinks(true)
       return undefined
     }
 
@@ -265,19 +263,10 @@ function App() {
             const lastPoint = lastTrailPointRef.current
             const distance = Math.hypot(nextX - lastPoint.x, nextY - lastPoint.y)
 
-            setCursorPosition({
-              x: nextX,
-              y: nextY,
-              active: true,
-            })
-
             if (distance > 42) {
               spawnCursorSymbol(nextX, nextY)
               lastTrailPointRef.current = { x: nextX, y: nextY }
             }
-          }}
-          onMouseLeave={() => {
-            setCursorPosition((current) => ({ ...current, active: false }))
           }}
           className={`content-surface relative min-h-0 flex-1 lg:h-full ${
             isLightTheme
@@ -356,7 +345,9 @@ function App() {
                 ? 'border-[rgba(36,40,31,0.08)] bg-[rgba(255,255,255,0.7)]'
                 : 'border-white/8 bg-[#0d0f11]/84'
             } ${
-              showMobileNavLinks ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-4 opacity-0'
+              !isMobile || showMobileNavLinks
+                ? 'translate-x-0 opacity-100'
+                : 'pointer-events-none translate-x-4 opacity-0'
             }`}>
               {sections.map((section) => {
                 const isActive = activeSection === section.id
@@ -389,7 +380,9 @@ function App() {
                 ? 'border-[rgba(36,40,31,0.08)] bg-[rgba(255,255,255,0.7)] text-[#5e6550]'
                 : 'border-white/8 bg-[#0d0f11]/84 text-white/46'
             } ${
-              showMobileNavLinks ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0'
+              !isMobile || showMobileNavLinks
+                ? 'translate-y-0 opacity-100'
+                : 'pointer-events-none translate-y-3 opacity-0'
             }`}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4 fill-current animate-[projects-indicator-bounce_2.1s_cubic-bezier(0.22,1,0.36,1)_infinite] rotate-180">

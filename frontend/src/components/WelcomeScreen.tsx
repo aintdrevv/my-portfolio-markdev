@@ -211,9 +211,6 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
 
     const buttonRect = button.getBoundingClientRect()
     const rootRect = particlesRoot.getBoundingClientRect()
-    const originX = buttonRect.left - rootRect.left + (buttonRect.width / 2)
-    const originY = buttonRect.top - rootRect.top + (buttonRect.height / 2)
-
     const palette = ['#93a66b', '#7d8d5a', '#c8d5a8', '#ffffff']
     const clusterAnchors = [
       { angle: -132, spread: 18, strength: 54 },
@@ -386,8 +383,6 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
 
     const rect = hoveredFrame.getBoundingClientRect()
     const pointerX = ((event.clientX - rect.left) / rect.width) - 0.5
-    const pointerY = ((event.clientY - rect.top) / rect.height) - 0.5
-
     imageRefs.current.forEach((image, index) => {
       if (!image) {
         return

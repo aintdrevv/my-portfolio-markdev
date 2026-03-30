@@ -6,7 +6,7 @@ import { socials } from '../data/siteContent'
 
 gsap.registerPlugin(TextPlugin)
 
-function ContactPage({ section, theme }) {
+function ContactPage({ theme }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [subject, setSubject] = useState('')

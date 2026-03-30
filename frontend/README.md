@@ -1,16 +1,34 @@
-# React + Vite
+# My Profile Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend portfolio app built with React, Vite, Tailwind CSS, and GSAP.
 
-Currently, two official plugins are available:
+## Run Locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Install dependencies and start the Vite dev server:
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Contact Form
 
-## Expanding the ESLint configuration
+The contact form posts to `/api/contact`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- In local development, Vite serves that endpoint through a dev middleware in [`vite.config.js`](./vite.config.js).
+- In production, the serverless handler in [`api/contact.js`](./api/contact.js) should be deployed on a platform that supports API functions, such as Vercel.
+- In a static-only deployment, the frontend will load but the contact form will not be able to send messages.
+
+Create a `.env.local` file with:
+
+```env
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM_EMAIL=your_verified_sender@example.com
+CONTACT_TO_EMAIL=your_inbox@example.com
+```
+
+## Notes
+
+- The contact form requires a message.
+- If an email is provided, it must be a valid email address.
+- The projects section attempts to load remote project images from Xano and falls back to local images if that request fails.
