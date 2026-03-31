@@ -9,17 +9,24 @@ const fallbackPanels = [
 
 const XANO_PICTURES_URL = 'https://x8ki-letl-twmt.n7.xano.io/api:4Sxa9QnL/list'
 
-const getPanelObjectPosition = (panel) => panel?.objectPosition ?? 'center center'
-const getPanelImageScale = (panel) => panel?.imageScale ?? 1
-const getLoopItems = (node) => (
-  Array.from(node.querySelectorAll('.projects-loop-item'))
-)
-const getPreviewImages = (node) => (
-  Array.from(node.querySelectorAll('.projects-preview-image'))
-)
-const getPanelId = (element) => (
-  element?.closest('[data-panel-id]')?.getAttribute('data-panel-id') ?? null
-)
+const getPanelObjectPosition = (panel) => panel.objectPosition ?? 'center center'
+const getPanelImageScale = (panel) => panel.imageScale ?? 1
+
+const attachPanelMeta = (panels, metas) =>
+  panels.map((panel, index) => ({
+    ...panel,
+    meta: panel.meta ?? metas[index] ?? null,
+  }))
+
+const getPanelLabel = (panel) => {
+  const tech = panel?.meta?.tech
+
+  if (Array.isArray(tech) && tech.length > 0) {
+    return tech.slice(0, 3).join(' / ')
+  }
+
+  return 'React / Vite / CSS'
+}
 
 const desktopSlots = [
   { top: 96, left: 0, right: 0, height: 'calc(100% - 96px)', zIndex: 3, opacity: 1, scale: 1 },
@@ -32,14 +39,12 @@ const PANEL_SHIFT_OFFSET = 0.14
 const PANEL_SETTLE_DURATION = 0.22
 
 function ProjectsPage({ section }) {
-  const [panelOrder, setPanelOrder] = useState(fallbackPanels)
-  const projectLabels = panelOrder.map((_, index) => (
-    section.projects?.[index]?.tech?.slice(0, 3).join(' / ') ?? 'React / Vite / CSS'
-  ))
+  const projectMetas = section.projects ?? []
+  const [panelOrder, setPanelOrder] = useState(() => attachPanelMeta(fallbackPanels, projectMetas))
   const previewRef = useRef(null)
   const wheelDeltaRef = useRef(0)
   const isAnimatingRef = useRef(false)
-  const panelOrderRef = useRef(fallbackPanels)
+  const panelOrderRef = useRef(panelOrder)
   const moveTimelineRef = useRef(null)
   const settleTimelineRef = useRef(null)
   const pendingSettleDirectionRef = useRef(null)
@@ -65,47 +70,40 @@ function ProjectsPage({ section }) {
 
         const records = await response.json()
         const projectRecords = Array.isArray(records)
-          ? records
-            .filter((record) => (
-              Boolean(record)
-              && typeof record === 'object'
-              && 'category' in record
-              && 'image_url' in record
-              && record.category === 'project'
-              && typeof record.image_url === 'string'
-            ))
-            .slice(0, 3)
+          ? records.filter((record) => record?.category === 'project' && record?.image_url).slice(0, 3)
           : []
 
         if (!ignore && projectRecords.length > 0) {
-          setPanelOrder(projectRecords.map((record, index) => ({
+          const panels = projectRecords.map((record, index) => ({
             id: `project-${record.id ?? index}`,
             src: record.image_url,
             objectPosition: 'center center',
             imageScale: 1,
-          })))
+          }))
+
+          setPanelOrder(attachPanelMeta(panels, projectMetas))
         }
       } catch {
         if (!ignore) {
-          setPanelOrder(fallbackPanels)
+          setPanelOrder(attachPanelMeta(fallbackPanels, projectMetas))
         }
       }
     }
 
     loadPictures()
 
-    return () => {
+     return () => {
       ignore = true
     }
-  }, [])
+  }, [projectMetas])
 
   useEffect(() => () => {
     moveTimelineRef.current?.kill()
     settleTimelineRef.current?.kill()
     wheelDeltaRef.current = 0
     isAnimatingRef.current = false
-    panelOrderRef.current = fallbackPanels
-  }, [])
+    panelOrderRef.current = attachPanelMeta(fallbackPanels, projectMetas)
+  }, [projectMetas])
 
   useEffect(() => {
     const node = previewRef.current
@@ -123,8 +121,8 @@ function ProjectsPage({ section }) {
     pendingSettleDirectionRef.current = null
     settleTimelineRef.current?.kill()
 
-    const reorderedItems = getLoopItems(node)
-    const reorderedImages = getPreviewImages(node)
+    const reorderedItems = Array.from(node.querySelectorAll('.projects-loop-item'))
+    const reorderedImages = Array.from(node.querySelectorAll('.projects-preview-image'))
 
     reorderedItems.forEach((item, index) => {
       const slot = desktopSlots[index] ?? desktopSlots[desktopSlots.length - 1]
@@ -144,7 +142,7 @@ function ProjectsPage({ section }) {
     })
 
     reorderedImages.forEach((image) => {
-      const panelId = getPanelId(image)
+      const panelId = image.closest('[data-panel-id]')?.getAttribute('data-panel-id')
       const panel = panelOrderRef.current.find((item) => item.id === panelId)
 
       gsap.set(image, {
@@ -183,14 +181,10 @@ function ProjectsPage({ section }) {
     }
 
     settleTimelineRef.current = gsap.fromTo(reorderedItems, {
-      autoAlpha: (index) => (
-        index === reorderedItems.length - 1 ? 0.78 : 1
-      ),
-      y: (index) => (
-        index === reorderedItems.length - 1 ? 16 : 0
-      ),
+      autoAlpha: (_, index) => (index === reorderedItems.length - 1 ? 0.78 : 1),
+      y: (_, index) => (index === reorderedItems.length - 1 ? 16 : 0),
     }, {
-      autoAlpha: (index) => desktopSlots[index]?.opacity ?? 1,
+      autoAlpha: (_, index) => desktopSlots[index]?.opacity ?? 1,
       y: 0,
       duration: PANEL_SETTLE_DURATION,
       ease: 'power2.out',
@@ -242,8 +236,8 @@ function ProjectsPage({ section }) {
         return
       }
 
-      const items = getLoopItems(node)
-      const images = getPreviewImages(node)
+      const items = Array.from(node.querySelectorAll('.projects-loop-item'))
+      const images = Array.from(node.querySelectorAll('.projects-preview-image'))
       if (items.length < 2) {
         return
       }
@@ -261,7 +255,7 @@ function ProjectsPage({ section }) {
       gsap.killTweensOf(images)
 
       images.forEach((image) => {
-        const panelId = getPanelId(image)
+        const panelId = image.closest('[data-panel-id]')?.getAttribute('data-panel-id')
         const panel = panelOrderRef.current.find((item) => item.id === panelId)
 
         gsap.set(image, {
@@ -366,14 +360,14 @@ function ProjectsPage({ section }) {
       const rect = node.getBoundingClientRect()
       const pointerX = ((event.clientX - rect.left) / rect.width) - 0.5
       const pointerY = ((event.clientY - rect.top) / rect.height) - 0.5
-      const images = getPreviewImages(node)
+      const images = Array.from(node.querySelectorAll('.projects-preview-image'))
       const frontImage = images[0]
 
       if (!frontImage) {
         return
       }
 
-      const panelId = getPanelId(frontImage)
+      const panelId = frontImage.closest('[data-panel-id]')?.getAttribute('data-panel-id')
       const panel = panelOrderRef.current.find((item) => item.id === panelId)
       const baseScale = getPanelImageScale(panel)
 
@@ -388,14 +382,14 @@ function ProjectsPage({ section }) {
     }
 
     const resetPointerMove = () => {
-      const images = getPreviewImages(node)
+      const images = Array.from(node.querySelectorAll('.projects-preview-image'))
       const frontImage = images[0]
 
       if (!frontImage) {
         return
       }
 
-      const panelId = getPanelId(frontImage)
+      const panelId = frontImage.closest('[data-panel-id]')?.getAttribute('data-panel-id')
       const panel = panelOrderRef.current.find((item) => item.id === panelId)
       const baseScale = getPanelImageScale(panel)
 
@@ -440,11 +434,11 @@ function ProjectsPage({ section }) {
           backfaceVisibility: 'hidden',
         }}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start px-4 pt-3 md:px-5 md:pt-4">
-          <span className="font-dm-mono text-[0.65rem] uppercase tracking-[0.24em] text-white/62">
-            {projectLabels[index] ?? 'React / Vite / CSS'}
-          </span>
-        </div>
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start px-4 pt-3 md:px-5 md:pt-4">
+            <span className="font-dm-mono text-[0.65rem] uppercase tracking-[0.24em] text-white/62">
+              {getPanelLabel(panel)}
+            </span>
+          </div>
         <img
           src={panel.src}
           alt=""
@@ -476,7 +470,7 @@ function ProjectsPage({ section }) {
         </div>
       </div>
 
-      <div className="relative min-h-[24rem] min-h-0 flex-1 px-0 md:px-5">
+      <div className="relative min-h-[24rem] flex-1 px-0 md:px-5">
         {isMobile ? (
           <div className="w-full">
             {panelOrder.map((panel, index) => (
@@ -489,7 +483,7 @@ function ProjectsPage({ section }) {
               >
                 <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start px-4 pt-3">
                   <span className="font-dm-mono text-[0.65rem] uppercase tracking-[0.24em] text-white/62">
-                    {projectLabels[index] ?? 'React / Vite / CSS'}
+                    {getPanelLabel(panel)}
                   </span>
                 </div>
                 <img
@@ -565,4 +559,3 @@ function ProjectsPage({ section }) {
 }
 
 export default ProjectsPage
-
