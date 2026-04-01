@@ -83,8 +83,6 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
 
     const ringLength = ring.getTotalLength()
     const baseColor = isLightTheme ? '#7f8f5c' : '#93a66b'
-    const hoverColor = isLightTheme ? '#5f6850' : '#c7d7a6'
-
     gsap.set(ring, {
       strokeDasharray: ringLength,
       strokeDashoffset: ringLength,
@@ -120,51 +118,8 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
       ease: 'back.out(1.7)',
     }, 0.08)
 
-    const pulse = gsap.to(inner, {
-      scale: 1.035,
-      duration: 1.8,
-      ease: 'sine.inOut',
-      repeat: -1,
-      yoyo: true,
-      delay: 0.9,
-    })
-
-    const handlePointerEnter = () => {
-      gsap.to(ring, {
-        stroke: hoverColor,
-        duration: 0.24,
-        ease: 'power2.out',
-      })
-      gsap.fromTo(wrap, {
-        rotate: 0,
-      }, {
-        rotate: 90,
-        duration: 0.65,
-        ease: 'power2.out',
-      })
-    }
-
-    const handlePointerLeave = () => {
-      gsap.to(ring, {
-        stroke: baseColor,
-        duration: 0.28,
-        ease: 'power2.out',
-      })
-      gsap.to(wrap, {
-        rotate: 0,
-        duration: 0.45,
-        ease: 'power2.out',
-      })
-    }
-
-    wrap.addEventListener('pointerenter', handlePointerEnter)
-    wrap.addEventListener('pointerleave', handlePointerLeave)
-
     return () => {
-      wrap.removeEventListener('pointerenter', handlePointerEnter)
-      wrap.removeEventListener('pointerleave', handlePointerLeave)
       intro.kill()
-      pulse.kill()
       gsap.killTweensOf([ring, wrap, inner])
     }
   }, [isLightTheme])
