@@ -264,15 +264,15 @@ function SkillsPage() {
               description="Focused on building clean, responsive interfaces with modern frontend tools."
               pills={['HTML', 'CSS', 'JavaScript', 'React', 'Vite']}
               sub="core stack"
-              className="md:col-span-2 md:row-span-2"
+              className="order-1 md:order-none md:col-span-2 md:row-span-2"
             />
-            <SkillCell containerRef={registerCell(1)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="React" sub="framework" className="md:col-span-1" />
-            <SkillCell containerRef={registerCell(2)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Tailwind" sub="styling" className="md:col-span-1" />
-            <SkillCell containerRef={registerCell(3)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Vite" sub="bundler" className="md:col-span-1" />
-            <SkillCell containerRef={registerCell(4)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="JavaScript" sub="language" className="md:col-span-1" />
+            <SkillCell containerRef={registerCell(1)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="React" sub="framework" className="order-2 md:order-none md:col-span-1" />
+            <SkillCell containerRef={registerCell(2)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Tailwind" sub="styling" className="order-3 md:order-none md:col-span-1" />
+            <SkillCell containerRef={registerCell(3)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Vite" sub="bundler" className="order-4 md:order-none md:col-span-1" />
+            <SkillCell containerRef={registerCell(4)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="JavaScript" sub="language" className="order-5 md:order-none md:col-span-1" />
 
-            <SkillCell containerRef={registerCell(5)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="GitHub" sub="versioning" className="md:col-span-1" />
-            <SkillCell containerRef={registerCell(6)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="VS Code" sub="editor" className="md:col-span-1" />
+            <SkillCell containerRef={registerCell(5)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="GitHub" sub="versioning" className="order-7 md:order-none md:col-span-1" />
+            <SkillCell containerRef={registerCell(6)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="VS Code" sub="editor" className="order-8 md:order-none md:col-span-1" />
             <HeroCell
               containerRef={registerCell(7)}
               onMouseMove={handleCellMove}
@@ -281,10 +281,10 @@ function SkillsPage() {
               description="Workflow and build tools I use while developing and iterating on projects."
               pills={['Cursor', 'GitHub', 'VS Code', 'Figma', 'npm']}
               sub="workflow"
-              className="md:col-span-2 md:row-span-2"
+              className="order-6 md:order-none md:col-span-2 md:row-span-2"
             />
-            <SkillCell containerRef={registerCell(8)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Figma" sub="design" className="md:col-span-1" />
-            <SkillCell containerRef={registerCell(9)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Blender" sub="3D" className="md:col-span-1" />
+            <SkillCell containerRef={registerCell(8)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Figma" sub="design" className="order-9 md:order-none md:col-span-1" />
+            <SkillCell containerRef={registerCell(9)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Blender" sub="3D" className="order-10 md:order-none md:col-span-1" />
 
             <WideCell
               containerRef={registerCell(10)}
@@ -293,7 +293,7 @@ function SkillsPage() {
               title="Styling"
               pills={['Tailwind CSS', 'Grid', 'Flexbox', 'Typography']}
               sub="ui system"
-              className="md:col-span-2"
+              className="order-11 md:order-none md:col-span-2"
             />
             <WideCell
               containerRef={registerCell(11)}
@@ -303,12 +303,12 @@ function SkillsPage() {
               pills={['Blender', 'Three.js', 'WebGL', 'GSAP']}
               sub="creative"
               topAlign
-              className="md:col-span-2"
+              className="order-12 md:order-none md:col-span-2"
             />
 
-            <SkillCell containerRef={registerCell(12)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Terminal" sub="cli" className="md:col-span-1" mini />
-            <SkillCell containerRef={registerCell(13)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="npm" sub="packages" className="md:col-span-1" mini />
-            <MarqueeCell containerRef={registerCell(14)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} className="md:col-span-2" />
+            <SkillCell containerRef={registerCell(12)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="Terminal" sub="cli" className="order-13 md:order-none md:col-span-1" mini />
+            <SkillCell containerRef={registerCell(13)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} label="npm" sub="packages" className="order-14 md:order-none md:col-span-1" mini />
+            <MarqueeCell containerRef={registerCell(14)} onMouseMove={handleCellMove} onMouseLeave={resetCellMove} className="order-15 md:order-none md:col-span-2" />
           </div>
         </div>
       </div>

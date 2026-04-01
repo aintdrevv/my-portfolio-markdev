@@ -1,3 +1,4 @@
+import gsap from 'gsap'
 import { useEffect, useRef, useState } from 'react'
 import ThemeToggle from './ThemeToggle'
 
@@ -36,6 +37,9 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
     }).format(new Date()),
   )
   const menuRef = useRef(null)
+  const avatarWrapRef = useRef(null)
+  const avatarRingRef = useRef(null)
+  const avatarInnerRef = useRef(null)
   const isLightTheme = theme === 'light'
 
   useEffect(() => {
@@ -68,6 +72,103 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
     return () => window.clearInterval(intervalId)
   }, [])
 
+  useEffect(() => {
+    const ring = avatarRingRef.current
+    const wrap = avatarWrapRef.current
+    const inner = avatarInnerRef.current
+
+    if (!ring || !wrap || !inner) {
+      return undefined
+    }
+
+    const ringLength = ring.getTotalLength()
+    const baseColor = isLightTheme ? '#7f8f5c' : '#93a66b'
+    const hoverColor = isLightTheme ? '#5f6850' : '#c7d7a6'
+
+    gsap.set(ring, {
+      strokeDasharray: ringLength,
+      strokeDashoffset: ringLength,
+      stroke: baseColor,
+    })
+
+    gsap.set(wrap, {
+      rotate: -110,
+      scale: 0.92,
+      transformOrigin: '50% 50%',
+    })
+
+    gsap.set(inner, {
+      scale: 0.96,
+      transformOrigin: '50% 50%',
+    })
+
+    const intro = gsap.timeline()
+    intro.to(wrap, {
+      rotate: 0,
+      scale: 1,
+      duration: 0.9,
+      ease: 'power3.out',
+    }, 0)
+    intro.to(ring, {
+      strokeDashoffset: 0,
+      duration: 1.1,
+      ease: 'power2.out',
+    }, 0.05)
+    intro.to(inner, {
+      scale: 1,
+      duration: 0.7,
+      ease: 'back.out(1.7)',
+    }, 0.08)
+
+    const pulse = gsap.to(inner, {
+      scale: 1.035,
+      duration: 1.8,
+      ease: 'sine.inOut',
+      repeat: -1,
+      yoyo: true,
+      delay: 0.9,
+    })
+
+    const handlePointerEnter = () => {
+      gsap.to(ring, {
+        stroke: hoverColor,
+        duration: 0.24,
+        ease: 'power2.out',
+      })
+      gsap.fromTo(wrap, {
+        rotate: 0,
+      }, {
+        rotate: 90,
+        duration: 0.65,
+        ease: 'power2.out',
+      })
+    }
+
+    const handlePointerLeave = () => {
+      gsap.to(ring, {
+        stroke: baseColor,
+        duration: 0.28,
+        ease: 'power2.out',
+      })
+      gsap.to(wrap, {
+        rotate: 0,
+        duration: 0.45,
+        ease: 'power2.out',
+      })
+    }
+
+    wrap.addEventListener('pointerenter', handlePointerEnter)
+    wrap.addEventListener('pointerleave', handlePointerLeave)
+
+    return () => {
+      wrap.removeEventListener('pointerenter', handlePointerEnter)
+      wrap.removeEventListener('pointerleave', handlePointerLeave)
+      intro.kill()
+      pulse.kill()
+      gsap.killTweensOf([ring, wrap, inner])
+    }
+  }, [isLightTheme])
+
   return (
     <aside className={`relative z-20 flex flex-col justify-between px-5 pt-5 pb-6 sm:px-6 sm:pt-6 lg:h-full lg:px-8 lg:pt-8 lg:pb-12 ${
       isLightTheme
@@ -75,122 +176,146 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
         : 'bg-[#0d0f11]'
     }`}>
       <div className="relative space-y-6 lg:space-y-6">
-        <div ref={menuRef} className={`relative -mx-5 flex items-center gap-4 px-5 py-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
-          isLightTheme ? 'bg-[rgba(93,111,63,0.08)]' : 'bg-white/[0.04]'
-        }`}>
-          <div className={`flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full ${
-            isLightTheme ? 'bg-[rgba(93,111,63,0.08)] text-[#3b4230]' : 'bg-white/[0.04] text-white/72'
+        <div className="w-full">
+          <div ref={menuRef} className={`relative -mx-5 flex items-center gap-4 px-5 py-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
+            isLightTheme ? 'bg-[rgba(93,111,63,0.08)]' : 'bg-white/[0.04]'
           }`}>
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-9 w-9 fill-current">
-              <path d="M12 12a4.25 4.25 0 1 0 0-8.5A4.25 4.25 0 0 0 12 12Zm0 2.25c-4.15 0-7.5 2.35-7.5 5.25 0 .55.45 1 1 1h13c.55 0 1-.45 1-1 0-2.9-3.35-5.25-7.5-5.25Z" />
+          <div ref={avatarWrapRef} className="relative flex h-[4.5rem] w-[4.5rem] items-center justify-center">
+            <svg
+              viewBox="0 0 84 84"
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+            >
+              <circle
+                ref={avatarRingRef}
+                cx="42"
+                cy="42"
+                r="38"
+                fill="none"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeDasharray="4 7"
+                opacity="0.95"
+              />
             </svg>
-          </div>
-          <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-            <div>
-              <h1 className={`text-xl font-semibold tracking-[-0.04em] sm:text-2xl ${
-                isLightTheme ? 'text-[#24281f]' : 'text-white'
-              }`}>Mark Macaraig</h1>
-              <p className="mt-2 text-[0.65rem] uppercase tracking-[0.35em] text-[#93a66b]">
-                Frontend Developer
-              </p>
+            <div
+              ref={avatarInnerRef}
+              className={`relative flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full ${
+                isLightTheme ? 'bg-[rgba(93,111,63,0.08)] text-[#3b4230]' : 'bg-white/[0.04] text-white/72'
+              }`}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-9 w-9 fill-current">
+                <path d="M12 12a4.25 4.25 0 1 0 0-8.5A4.25 4.25 0 0 0 12 12Zm0 2.25c-4.15 0-7.5 2.35-7.5 5.25 0 .55.45 1 1 1h13c.55 0 1-.45 1-1 0-2.9-3.35-5.25-7.5-5.25Z" />
+              </svg>
             </div>
-            <div className="shrink-0">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((open) => !open)}
-                  aria-label="Open quick actions"
-                  aria-expanded={menuOpen}
-                  className={`inline-flex h-9 w-9 items-center justify-center border text-base transition ${
-                    isLightTheme
-                      ? 'border-[rgba(36,40,31,0.12)] bg-[rgba(93,111,63,0.08)] text-[#3b4230] hover:border-[rgba(36,40,31,0.18)] hover:bg-[rgba(93,111,63,0.12)] hover:text-[#24281f]'
-                      : 'border-white/10 bg-white/[0.04] text-white/80 hover:border-white/16 hover:bg-white/[0.07] hover:text-white'
-                  }`}
-                >
-                  <span className="leading-none">+</span>
-                </button>
-                <div className="lg:hidden">
-                  <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-                </div>
+          </div>
+            <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+              <div>
+                <h1 className={`text-xl font-semibold tracking-[-0.04em] sm:text-2xl ${
+                  isLightTheme ? 'text-[#24281f]' : 'text-white'
+                }`}>Mark Macaraig</h1>
+                <p className="mt-2 text-[0.65rem] uppercase tracking-[0.35em] text-[#93a66b]">
+                  Frontend Developer
+                </p>
               </div>
-
-              {menuOpen ? (
-                <div className={`dropdown-panel absolute top-full left-0 right-0 z-30 p-1.5 ${
-                  isLightTheme ? 'bg-[#edf1e3]' : 'bg-[#171a1d]'
-                }`}>
-                  <div className="grid grid-cols-1 gap-1 lg:hidden">
-                    {sections.map((section) => {
-                      const isActive = section.id === activeSection
-
-                      return (
-                        <button
-                          key={section.id}
-                          type="button"
-                          onClick={() => {
-                            onSectionChange(section.id)
-                            setMenuOpen(false)
-                          }}
-                          className={`dropdown-item nav-link-hover relative flex min-w-0 items-center justify-between overflow-hidden px-3 py-2 text-left text-sm transition-colors duration-300 ${
-                            isLightTheme
-                              ? isActive
-                                ? 'bg-[rgba(93,111,63,0.1)] text-[#24281f]'
-                                : 'text-[#4e5641] hover:text-[#24281f]'
-                              : isActive
-                                ? 'bg-white/[0.06] text-white'
-                                : 'text-white/65 hover:text-white/90'
-                          }`}
-                          style={{ animationDelay: `${110 + (sections.findIndex((item) => item.id === section.id) * 40)}ms` }}
-                        >
-                          {!isActive ? (
-                            <span
-                              aria-hidden="true"
-                              className={`nav-link-hover-fill absolute inset-0 ${
-                                isLightTheme ? 'light-nav-link-hover-fill' : ''
-                              }`}
-                            />
-                          ) : null}
-                          <span className="relative z-10 flex items-center gap-3">
-                            <span className={`flex h-5 w-5 items-center justify-center ${
-                              isActive ? 'text-[#93a66b]' : isLightTheme ? 'text-[#5e6550]' : 'text-white/50'
-                            }`}>
-                              {sectionIcons[section.id]}
-                            </span>
-                            <span className="block text-sm font-medium tracking-[0.01em]">
-                              {section.label}
-                            </span>
-                          </span>
-                          <span className={`relative z-10 h-2 w-2 rounded-full ${
-                            isActive ? 'bg-[#93a66b]' : isLightTheme ? 'bg-[#7f886f]' : 'bg-white/26'
-                          }`} />
-                        </button>
-                      )
-                    })}
-                    <div className={`my-1 h-px ${isLightTheme ? 'bg-[rgba(36,40,31,0.08)]' : 'bg-white/8'}`} />
-                  </div>
-                  <a
-                    href="/Dev.pdf"
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => setMenuOpen(false)}
-                    className={`dropdown-item flex items-center justify-between px-3 py-2 text-sm transition ${
+              <div className="shrink-0">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setMenuOpen((open) => !open)}
+                    aria-label="Open quick actions"
+                    aria-expanded={menuOpen}
+                    className={`inline-flex h-9 w-9 items-center justify-center border text-base transition ${
                       isLightTheme
-                        ? 'text-[#3b4230] hover:bg-[rgba(93,111,63,0.08)] hover:text-[#24281f]'
-                        : 'text-white/82 hover:bg-white/[0.05] hover:text-white'
+                        ? 'border-[rgba(36,40,31,0.12)] bg-[rgba(93,111,63,0.08)] text-[#3b4230] hover:border-[rgba(36,40,31,0.18)] hover:bg-[rgba(93,111,63,0.12)] hover:text-[#24281f]'
+                        : 'border-white/10 bg-white/[0.04] text-white/80 hover:border-white/16 hover:bg-white/[0.07] hover:text-white'
                     }`}
-                    style={{ animationDelay: '110ms' }}
                   >
-                    <span>Resume</span>
-                    <span className={`text-xs uppercase tracking-[0.18em] ${
-                      isLightTheme ? 'text-[#5e6550]' : 'text-white/34'
-                    }`}>View</span>
-                  </a>
+                    <span className="leading-none">+</span>
+                  </button>
+                  <div className="lg:hidden">
+                    <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+                  </div>
                 </div>
-              ) : null}
+
+                {menuOpen ? (
+                  <div className={`dropdown-panel absolute top-full left-0 right-0 z-30 p-1.5 ${
+                    isLightTheme ? 'bg-[#edf1e3]' : 'bg-[#171a1d]'
+                  }`}>
+                    <div className="grid grid-cols-1 gap-1 lg:hidden">
+                      {sections.map((section) => {
+                        const isActive = section.id === activeSection
+
+                        return (
+                          <button
+                            key={section.id}
+                            type="button"
+                            onClick={() => {
+                              onSectionChange(section.id)
+                              setMenuOpen(false)
+                            }}
+                            className={`dropdown-item nav-link-hover relative flex min-w-0 items-center justify-between overflow-hidden px-3 py-2 text-left text-sm transition-colors duration-300 ${
+                              isLightTheme
+                                ? isActive
+                                  ? 'bg-[rgba(93,111,63,0.1)] text-[#24281f]'
+                                  : 'text-[#4e5641] hover:text-[#24281f]'
+                                : isActive
+                                  ? 'bg-white/[0.06] text-white'
+                                  : 'text-white/65 hover:text-white/90'
+                            }`}
+                            style={{ animationDelay: `${110 + (sections.findIndex((item) => item.id === section.id) * 40)}ms` }}
+                          >
+                            {!isActive ? (
+                              <span
+                                aria-hidden="true"
+                                className={`nav-link-hover-fill absolute inset-0 ${
+                                  isLightTheme ? 'light-nav-link-hover-fill' : ''
+                                }`}
+                              />
+                            ) : null}
+                            <span className="relative z-10 flex items-center gap-3">
+                              <span className={`flex h-5 w-5 items-center justify-center ${
+                                isActive ? 'text-[#93a66b]' : isLightTheme ? 'text-[#5e6550]' : 'text-white/50'
+                              }`}>
+                                {sectionIcons[section.id]}
+                              </span>
+                              <span className="block text-sm font-medium tracking-[0.01em]">
+                                {section.label}
+                              </span>
+                            </span>
+                            <span className={`relative z-10 h-2 w-2 rounded-full ${
+                              isActive ? 'bg-[#93a66b]' : isLightTheme ? 'bg-[#7f886f]' : 'bg-white/26'
+                            }`} />
+                          </button>
+                        )
+                      })}
+                      <div className={`my-1 h-px ${isLightTheme ? 'bg-[rgba(36,40,31,0.08)]' : 'bg-white/8'}`} />
+                    </div>
+                    <a
+                      href="/Dev.pdf"
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => setMenuOpen(false)}
+                      className={`dropdown-item flex items-center justify-between px-3 py-2 text-sm transition ${
+                        isLightTheme
+                          ? 'text-[#3b4230] hover:bg-[rgba(93,111,63,0.08)] hover:text-[#24281f]'
+                          : 'text-white/82 hover:bg-white/[0.05] hover:text-white'
+                      }`}
+                      style={{ animationDelay: '110ms' }}
+                    >
+                      <span>Resume</span>
+                      <span className={`text-xs uppercase tracking-[0.18em] ${
+                        isLightTheme ? 'text-[#5e6550]' : 'text-white/34'
+                      }`}>View</span>
+                    </a>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-4 py-4 lg:hidden">
+        <div className="space-y-4 pt-4 lg:hidden">
           <p className={`max-w-[42ch] text-sm leading-6 ${
             isLightTheme ? 'text-[#3b4230]' : 'text-white/72'
           }`}>
@@ -206,36 +331,40 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
           }`}>
             Social Links
           </p>
-          <div className="flex items-center gap-4">
-            {socials.map((social) => (
-              <a
-                key={social.id}
-                href={social.href}
-                aria-label={social.label}
-                onClick={(event) => {
-                  if (social.id !== 'gmail') {
-                    return
-                  }
+          <div className="w-full">
+            <div className="flex w-full items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {socials.map((social) => (
+                  <a
+                    key={social.id}
+                    href={social.href}
+                    aria-label={social.label}
+                    onClick={(event) => {
+                      if (social.id !== 'gmail') {
+                        return
+                      }
 
-                  event.preventDefault()
-                  onSectionChange('contact')
-                }}
-                className={`transition ${
-                  isLightTheme
-                    ? 'text-[#4e5641] hover:text-[#24281f]'
-                    : 'text-white/72 hover:text-white'
-                }`}
-              >
-                <span className="flex h-5 w-5 items-center justify-center">
-                  {social.icon}
-                </span>
-              </a>
-            ))}
-            <span className={`ml-auto font-dm-mono text-[0.62rem] uppercase tracking-[0.2em] ${
-              isLightTheme ? 'text-[#5e6550]' : 'text-white/34'
-            }`}>
-              {currentTime}
-            </span>
+                      event.preventDefault()
+                      onSectionChange('contact')
+                    }}
+                    className={`transition ${
+                      isLightTheme
+                        ? 'text-[#4e5641] hover:text-[#24281f]'
+                        : 'text-white/72 hover:text-white'
+                    }`}
+                  >
+                    <span className="flex h-5 w-5 items-center justify-center">
+                      {social.icon}
+                    </span>
+                  </a>
+                ))}
+              </div>
+              <span className={`shrink-0 font-dm-mono text-[0.62rem] uppercase tracking-[0.2em] ${
+                isLightTheme ? 'text-[#5e6550]' : 'text-white/34'
+              }`}>
+                {currentTime}
+              </span>
+            </div>
           </div>
         </div>
 

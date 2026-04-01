@@ -83,29 +83,31 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
 
   return (
     <div className="relative px-1 py-1 pb-6 lg:py-2 lg:pb-8">
-      <div className="flex min-h-[4.5rem] items-start justify-between gap-6">
-        <div className="flex items-center gap-3">
-          <p className={`font-dm-mono text-[10px] uppercase tracking-[0.28em] ${
-            isLightTheme ? 'text-[#5f6850]' : 'text-white/30'
-          }`}>
-            {eyebrow}
-          </p>
-          <span className={`h-px w-10 ${isLightTheme ? 'bg-[#7f886f]' : 'bg-white/30'}`} />
-        </div>
-
-        <div className="hidden shrink-0 items-center gap-4 lg:flex">
-          <div className={`font-dm-mono text-[10px] uppercase tracking-[0.24em] ${
-            isLightTheme ? 'text-[#5f6850]' : 'text-white/34'
-          }`}>
-            {currentTime} GMT+8
+      <div className="min-h-[4.5rem]">
+        <div className="flex min-h-[4.5rem] items-start justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <p className={`font-dm-mono text-[10px] uppercase tracking-[0.28em] ${
+              isLightTheme ? 'text-[#5f6850]' : 'text-white/30'
+            }`}>
+              {eyebrow}
+            </p>
+            <span className={`h-px w-10 ${isLightTheme ? 'bg-[#7f886f]' : 'bg-white/30'}`} />
           </div>
-          <div className="text-[#93a66b] text-xs uppercase tracking-[0.26em]">
-            Portfolio
+
+          <div className="hidden shrink-0 items-center gap-4 lg:flex">
+            <div className={`font-dm-mono text-[10px] uppercase tracking-[0.24em] ${
+              isLightTheme ? 'text-[#5f6850]' : 'text-white/34'
+            }`}>
+              {currentTime} GMT+8
+            </div>
+            <div className="text-[#93a66b] text-xs uppercase tracking-[0.26em]">
+              Portfolio
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 max-w-4xl lg:mt-6">
+      <div className="mt-6 min-h-[8.25rem] max-w-4xl lg:mt-6">
         <div className="flex flex-col gap-2">
           <p
             aria-hidden="true"

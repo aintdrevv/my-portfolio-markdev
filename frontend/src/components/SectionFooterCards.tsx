@@ -1,61 +1,9 @@
-import gsap from 'gsap'
-import { useEffect, useRef } from 'react'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
-
 function SectionFooterCards({ theme }) {
   const isLightTheme = theme === 'light'
-  const mobileFooterRef = useRef(null)
-
-  useEffect(() => {
-    const footerNode = mobileFooterRef.current
-
-    if (!footerNode || typeof window === 'undefined' || window.innerWidth >= 1024) {
-      return undefined
-    }
-
-    const timeline = gsap.timeline({
-      paused: true,
-      scrollTrigger: {
-        trigger: footerNode,
-        start: 'top 92%',
-        once: true,
-      },
-    })
-
-    timeline.fromTo(footerNode, {
-      autoAlpha: 0,
-      y: 42,
-      scale: 0.92,
-      boxShadow: '0 0 0 rgba(147,166,107,0)',
-    }, {
-      autoAlpha: 1,
-      y: -8,
-      scale: 1.03,
-      boxShadow: '0 0 28px rgba(147,166,107,0.12)',
-      duration: 0.5,
-      ease: 'power2.out',
-    })
-
-    timeline.to(footerNode, {
-      y: 0,
-      scale: 1,
-      boxShadow: '0 0 0 rgba(147,166,107,0)',
-      duration: 0.52,
-      ease: 'back.out(1.8)',
-      clearProps: 'opacity,visibility,transform,boxShadow',
-    })
-
-    return () => {
-      timeline.kill()
-      gsap.killTweensOf(footerNode)
-    }
-  }, [])
 
   return (
     <>
-      <div ref={mobileFooterRef} className={`w-full border-t pt-6 lg:hidden ${
+      <div className={`w-full border-t pt-6 lg:hidden ${
         isLightTheme ? 'border-[#7f886f]/40' : 'border-white/10'
       }`}>
         <div className="px-1">
