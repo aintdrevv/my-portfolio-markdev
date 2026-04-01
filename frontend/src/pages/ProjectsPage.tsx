@@ -36,17 +36,23 @@ const desktopSlots = [
 
 const PANEL_SHIFT_DURATION = 0.48
 const PANEL_SHIFT_OFFSET = 0.14
-const PANEL_SETTLE_DURATION = 0.22
+const WHEEL_TRIGGER_THRESHOLD = 36
+const DOWN_SETTLE_DURATION = 0.22
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
 function ProjectsPage({ section }) {
   const projectMetas = section.projects ?? []
   const [panelOrder, setPanelOrder] = useState(() => attachPanelMeta(fallbackPanels, projectMetas))
-  const previewRef = useRef(null)
+  const previewRef = useRef<HTMLDivElement | null>(null)
   const wheelDeltaRef = useRef(0)
   const isAnimatingRef = useRef(false)
+  const activeDirectionRef = useRef(0)
+  const queuedDirectionRef = useRef(0)
+  const queuedIntensityRef = useRef(1)
+  const movePanelsRef = useRef<((direction: number, intensity?: number) => void) | null>(null)
   const panelOrderRef = useRef(panelOrder)
   const moveTimelineRef = useRef(null)
-  const settleTimelineRef = useRef(null)
   const pendingSettleDirectionRef = useRef(null)
   const [zoomedPanel, setZoomedPanel] = useState(null)
   const [isMobile, setIsMobile] = useState(() => (
@@ -92,16 +98,19 @@ function ProjectsPage({ section }) {
 
     loadPictures()
 
-     return () => {
+    return () => {
       ignore = true
     }
   }, [projectMetas])
 
   useEffect(() => () => {
     moveTimelineRef.current?.kill()
-    settleTimelineRef.current?.kill()
     wheelDeltaRef.current = 0
     isAnimatingRef.current = false
+    activeDirectionRef.current = 0
+    queuedDirectionRef.current = 0
+    queuedIntensityRef.current = 1
+    movePanelsRef.current = null
     panelOrderRef.current = attachPanelMeta(fallbackPanels, projectMetas)
   }, [projectMetas])
 
@@ -112,6 +121,21 @@ function ProjectsPage({ section }) {
       return undefined
     }
 
+    const flushQueuedMove = () => {
+      if (!queuedDirectionRef.current) {
+        return
+      }
+
+      const nextDirection = queuedDirectionRef.current
+      const nextIntensity = queuedIntensityRef.current
+      queuedDirectionRef.current = 0
+      queuedIntensityRef.current = 1
+
+      window.requestAnimationFrame(() => {
+        movePanelsRef.current?.(nextDirection, nextIntensity)
+      })
+    }
+
     const direction = pendingSettleDirectionRef.current
 
     if (!direction) {
@@ -119,10 +143,9 @@ function ProjectsPage({ section }) {
     }
 
     pendingSettleDirectionRef.current = null
-    settleTimelineRef.current?.kill()
 
-    const reorderedItems = Array.from(node.querySelectorAll('.projects-loop-item'))
-    const reorderedImages = Array.from(node.querySelectorAll('.projects-preview-image'))
+    const reorderedItems = Array.from(node.querySelectorAll<HTMLElement>('.projects-loop-item'))
+    const reorderedImages = Array.from(node.querySelectorAll<HTMLImageElement>('.projects-preview-image'))
 
     reorderedItems.forEach((item, index) => {
       const slot = desktopSlots[index] ?? desktopSlots[desktopSlots.length - 1]
@@ -158,41 +181,43 @@ function ProjectsPage({ section }) {
 
       if (!backItem) {
         isAnimatingRef.current = false
+        activeDirectionRef.current = 0
         return undefined
       }
 
       gsap.set(backItem, {
-        yPercent: 24,
         autoAlpha: desktopSlots[desktopSlots.length - 1].opacity,
       })
 
-      settleTimelineRef.current = gsap.to(backItem, {
+      gsap.fromTo(backItem, {
+        yPercent: 18,
+      }, {
         yPercent: 0,
-        autoAlpha: desktopSlots[desktopSlots.length - 1].opacity,
-        duration: 0.46,
-        ease: 'power3.out',
+        duration: DOWN_SETTLE_DURATION,
+        ease: 'power2.out',
+        overwrite: false,
         clearProps: 'yPercent',
         onComplete: () => {
           isAnimatingRef.current = false
+          activeDirectionRef.current = 0
+          flushQueuedMove()
         },
       })
 
       return undefined
     }
 
-    settleTimelineRef.current = gsap.fromTo(reorderedItems, {
-      autoAlpha: (_, index) => (index === reorderedItems.length - 1 ? 0.78 : 1),
-      y: (_, index) => (index === reorderedItems.length - 1 ? 16 : 0),
-    }, {
-      autoAlpha: (_, index) => desktopSlots[index]?.opacity ?? 1,
-      y: 0,
-      duration: PANEL_SETTLE_DURATION,
-      ease: 'power2.out',
-      clearProps: 'y,yPercent',
-      onComplete: () => {
-        isAnimatingRef.current = false
-      },
+    reorderedItems.forEach((item, index) => {
+      gsap.set(item, {
+        autoAlpha: desktopSlots[index]?.opacity ?? 1,
+        y: 0,
+        clearProps: 'y,yPercent',
+      })
     })
+
+    isAnimatingRef.current = false
+    activeDirectionRef.current = 0
+    flushQueuedMove()
 
     return undefined
   }, [isMobile, panelOrder])
@@ -231,18 +256,28 @@ function ProjectsPage({ section }) {
       return undefined
     }
 
-    const movePanels = (direction) => {
+    const movePanels = (direction, intensity = 1) => {
       if (isAnimatingRef.current) {
+        if (direction !== activeDirectionRef.current) {
+          queuedDirectionRef.current = direction
+          queuedIntensityRef.current = intensity
+        }
         return
       }
 
-      const items = Array.from(node.querySelectorAll('.projects-loop-item'))
-      const images = Array.from(node.querySelectorAll('.projects-preview-image'))
+      const items = Array.from(node.querySelectorAll<HTMLElement>('.projects-loop-item'))
+      const images = Array.from(node.querySelectorAll<HTMLImageElement>('.projects-preview-image'))
       if (items.length < 2) {
         return
       }
 
       isAnimatingRef.current = true
+      activeDirectionRef.current = direction
+      const motionFactor = clamp(intensity, 1, 1.8)
+      const shiftDuration = direction < 0
+        ? PANEL_SHIFT_DURATION
+        : clamp(PANEL_SHIFT_DURATION - ((motionFactor - 1) * 0.14), 0.3, PANEL_SHIFT_DURATION)
+      const backRise = clamp(18 + ((motionFactor - 1) * 8), 18, 24)
       const currentOrder = panelOrderRef.current
       const outgoingIndex = direction > 0 ? 0 : items.length - 1
       const outgoingItem = items[outgoingIndex]
@@ -251,7 +286,7 @@ function ProjectsPage({ section }) {
         ? desktopSlots.slice(0, remainingItems.length)
         : desktopSlots.slice(1, items.length)
 
-      gsap.killTweensOf(items)
+      moveTimelineRef.current?.kill()
       gsap.killTweensOf(images)
 
       images.forEach((image) => {
@@ -267,7 +302,7 @@ function ProjectsPage({ section }) {
 
       const timeline = gsap.timeline({
         defaults: {
-          duration: PANEL_SHIFT_DURATION,
+          duration: shiftDuration,
           ease: 'power3.inOut',
           force3D: true,
         },
@@ -288,7 +323,7 @@ function ProjectsPage({ section }) {
         timeline.to(outgoingItem, {
           yPercent: 110,
           autoAlpha: 1,
-          duration: PANEL_SHIFT_DURATION,
+          duration: shiftDuration,
           ease: 'power3.inOut',
           force3D: true,
         }, 0)
@@ -327,12 +362,11 @@ function ProjectsPage({ section }) {
             scale: frontSlot.scale ?? 1,
             zIndex: frontSlot.zIndex + 1,
             yPercent: 100,
-            autoAlpha: 1,
           })
 
           timeline.to(recycledItem, {
             yPercent: 0,
-            duration: PANEL_SHIFT_DURATION + 0.08,
+            duration: shiftDuration,
             ease: 'power2.out',
             force3D: true,
             clearProps: 'yPercent',
@@ -342,25 +376,28 @@ function ProjectsPage({ section }) {
 
     }
 
+    movePanelsRef.current = movePanels
+
     const handleWheel = (event) => {
       event.preventDefault()
 
       wheelDeltaRef.current += event.deltaY
 
-      if (Math.abs(wheelDeltaRef.current) < 36) {
+      if (Math.abs(wheelDeltaRef.current) < WHEEL_TRIGGER_THRESHOLD) {
         return
       }
 
       const direction = wheelDeltaRef.current > 0 ? 1 : -1
+      const intensity = clamp(Math.abs(wheelDeltaRef.current) / 120, 1, 1.8)
       wheelDeltaRef.current = 0
-      movePanels(direction)
+      movePanels(direction, intensity)
     }
 
     const handlePointerMove = (event) => {
       const rect = node.getBoundingClientRect()
       const pointerX = ((event.clientX - rect.left) / rect.width) - 0.5
       const pointerY = ((event.clientY - rect.top) / rect.height) - 0.5
-      const images = Array.from(node.querySelectorAll('.projects-preview-image'))
+      const images = Array.from(node.querySelectorAll<HTMLImageElement>('.projects-preview-image'))
       const frontImage = images[0]
 
       if (!frontImage) {
@@ -382,7 +419,7 @@ function ProjectsPage({ section }) {
     }
 
     const resetPointerMove = () => {
-      const images = Array.from(node.querySelectorAll('.projects-preview-image'))
+      const images = Array.from(node.querySelectorAll<HTMLImageElement>('.projects-preview-image'))
       const frontImage = images[0]
 
       if (!frontImage) {
@@ -408,6 +445,7 @@ function ProjectsPage({ section }) {
     node.addEventListener('pointerleave', resetPointerMove)
 
     return () => {
+      movePanelsRef.current = null
       node.removeEventListener('wheel', handleWheel)
       node.removeEventListener('pointermove', handlePointerMove)
       node.removeEventListener('pointerleave', resetPointerMove)
