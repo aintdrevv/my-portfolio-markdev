@@ -212,7 +212,7 @@ function ContactPage({ theme }) {
             <label className="grid gap-2">
               <span className="text-[0.68rem] uppercase tracking-[0.2em] text-white/34">Message</span>
               <textarea
-                rows="6"
+                rows={6}
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 placeholder="Write your message here..."
