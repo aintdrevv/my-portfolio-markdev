@@ -82,43 +82,15 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
   }, [ghostWord])
 
   return (
-    <div className="relative px-1 py-1 pb-6 lg:min-h-[9.5rem] lg:py-2 lg:pb-8">
-      <div className="flex flex-col gap-4 lg:min-h-[7.5rem] lg:flex-row lg:items-start lg:justify-between lg:gap-6">
-        <div className="max-w-4xl lg:min-h-[7.5rem]">
-          <div className="flex items-center gap-3">
-            <p className={`font-dm-mono text-[10px] uppercase tracking-[0.28em] ${
-              isLightTheme ? 'text-[#5f6850]' : 'text-white/30'
-            }`}>
-              {eyebrow}
-            </p>
-            <span className={`h-px w-10 ${isLightTheme ? 'bg-[#7f886f]' : 'bg-white/30'}`} />
-          </div>
-
-          <div className="mt-4 flex flex-col gap-2 lg:mt-5">
-            <p
-              aria-hidden="true"
-              className={`font-bebas pointer-events-none select-none text-[38px] leading-[0.9] uppercase tracking-[0.08em] sm:text-[46px] md:text-[56px] lg:text-[68px] ${
-                isLightTheme ? 'text-[#93a66b]/16' : 'text-white/[0.08]'
-              }`}
-            >
-              {displayGhostWord}
-            </p>
-            <h2 className={`font-space-grotesk relative z-10 max-w-[18ch] text-[22px] leading-[1.05] font-medium tracking-[-0.04em] sm:text-[24px] md:text-[28px] lg:text-[30px] ${
-              isLightTheme ? 'text-[#24281f]' : 'text-white/88'
-            }`}>
-              {accentIndex >= 0 ? (
-                <>
-                  {beforeAccent}
-                  <span className="text-[#93a66b]">
-                    {highlightedAccent}
-                  </span>
-                  {afterAccent}
-                </>
-              ) : (
-                title
-              )}
-            </h2>
-          </div>
+    <div className="relative px-1 py-1 pb-6 lg:py-2 lg:pb-8">
+      <div className="flex min-h-[4.5rem] items-start justify-between gap-6">
+        <div className="flex items-center gap-3">
+          <p className={`font-dm-mono text-[10px] uppercase tracking-[0.28em] ${
+            isLightTheme ? 'text-[#5f6850]' : 'text-white/30'
+          }`}>
+            {eyebrow}
+          </p>
+          <span className={`h-px w-10 ${isLightTheme ? 'bg-[#7f886f]' : 'bg-white/30'}`} />
         </div>
 
         <div className="hidden shrink-0 items-center gap-4 lg:flex">
@@ -130,6 +102,34 @@ function SectionHeader({ eyebrow, title, ghostWord, accentText, theme }) {
           <div className="text-[#93a66b] text-xs uppercase tracking-[0.26em]">
             Portfolio
           </div>
+        </div>
+      </div>
+
+      <div className="mt-6 max-w-4xl lg:mt-6">
+        <div className="flex flex-col gap-2">
+          <p
+            aria-hidden="true"
+            className={`font-bebas pointer-events-none select-none text-[38px] leading-[0.9] uppercase tracking-[0.08em] sm:text-[46px] md:text-[56px] lg:text-[68px] ${
+              isLightTheme ? 'text-[#93a66b]/16' : 'text-white/[0.08]'
+            }`}
+          >
+            {displayGhostWord}
+          </p>
+          <h2 className={`font-space-grotesk relative z-10 max-w-[18ch] text-[22px] leading-[1.05] font-medium tracking-[-0.04em] sm:text-[24px] md:text-[28px] lg:text-[30px] ${
+            isLightTheme ? 'text-[#24281f]' : 'text-white/88'
+          }`}>
+            {accentIndex >= 0 ? (
+              <>
+                {beforeAccent}
+                <span className="text-[#93a66b]">
+                  {highlightedAccent}
+                </span>
+                {afterAccent}
+              </>
+            ) : (
+              title
+            )}
+          </h2>
         </div>
       </div>
     </div>

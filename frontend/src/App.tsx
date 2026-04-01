@@ -373,6 +373,27 @@ function App() {
 
           <button
             type="button"
+            aria-label="Back to welcome page"
+            onClick={() => setShowWelcome(true)}
+            className={`fixed top-4 left-4 z-40 flex h-9 w-9 items-center justify-center border backdrop-blur-xl transition duration-300 lg:hidden ${
+              isLightTheme
+                ? 'border-[rgba(36,40,31,0.08)] bg-[rgba(255,255,255,0.7)] text-[#5e6550]'
+                : 'border-white/8 bg-[#0d0f11]/84 text-white/46'
+            } ${
+              !isMobile || showMobileNavLinks
+                ? 'translate-y-0 opacity-100'
+                : 'pointer-events-none -translate-y-3 opacity-0'
+            }`}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 stroke-current" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 4.75h7.25A1.75 1.75 0 0 1 19 6.5v11a1.75 1.75 0 0 1-1.75 1.75H10" />
+              <path d="M13 12H5.25" />
+              <path d="m8.5 8.75-3.25 3.25 3.25 3.25" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
             aria-label="Back to top"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className={`fixed inset-x-0 bottom-4 z-40 mx-auto flex h-8 w-8 items-center justify-center border backdrop-blur-xl transition duration-300 lg:hidden ${

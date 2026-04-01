@@ -178,6 +178,7 @@ function OverviewPage({ section, sliderCopies, toolIcons, theme }) {
       <div className="hidden lg:block">
         <SectionFooterCards theme={theme} />
       </div>
+
     </div>
   )
 }

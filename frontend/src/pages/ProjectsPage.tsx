@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 const fallbackPanels = [
   { id: 'store', src: '/store-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
@@ -42,7 +42,7 @@ const DOWN_SETTLE_DURATION = 0.22
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
 function ProjectsPage({ section }) {
-  const projectMetas = section.projects ?? []
+  const projectMetas = useMemo(() => section.projects ?? [], [section.projects])
   const [panelOrder, setPanelOrder] = useState(() => attachPanelMeta(fallbackPanels, projectMetas))
   const previewRef = useRef<HTMLDivElement | null>(null)
   const wheelDeltaRef = useRef(0)
@@ -277,7 +277,6 @@ function ProjectsPage({ section }) {
       const shiftDuration = direction < 0
         ? PANEL_SHIFT_DURATION
         : clamp(PANEL_SHIFT_DURATION - ((motionFactor - 1) * 0.14), 0.3, PANEL_SHIFT_DURATION)
-      const backRise = clamp(18 + ((motionFactor - 1) * 8), 18, 24)
       const currentOrder = panelOrderRef.current
       const outgoingIndex = direction > 0 ? 0 : items.length - 1
       const outgoingItem = items[outgoingIndex]

@@ -74,7 +74,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
         ? 'border-b border-[rgba(36,40,31,0.08)] bg-[rgba(255,255,255,0.72)] shadow-[0_0_0_1px_rgba(255,255,255,0.18)] backdrop-blur-xl lg:border-r lg:border-b-0'
         : 'bg-[#0d0f11]'
     }`}>
-      <div className="relative space-y-6 lg:space-y-8">
+      <div className="relative space-y-6 lg:space-y-6">
         <div ref={menuRef} className={`relative -mx-5 flex items-center gap-4 px-5 py-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
           isLightTheme ? 'bg-[rgba(93,111,63,0.08)]' : 'bg-white/[0.04]'
         }`}>
