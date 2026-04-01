@@ -21,6 +21,8 @@ function TaggedPoint({ tag, text }) {
 function OverviewPage({ section, sliderCopies, toolIcons, theme }) {
   const iconRefs = useRef([])
   const mobilePurposeRef = useRef(null)
+  const dockPointerXRef = useRef(null)
+  const dockHoverActiveRef = useRef(false)
   const isLightTheme = theme === 'light'
 
   useEffect(() => {
@@ -68,25 +70,7 @@ function OverviewPage({ section, sliderCopies, toolIcons, theme }) {
     }
   }, [])
 
-  const resetDockEffect = () => {
-    iconRefs.current.forEach((icon) => {
-      if (!icon) {
-        return
-      }
-
-      gsap.to(icon, {
-        scale: 1,
-        y: 0,
-        filter: 'brightness(1)',
-        duration: 0.28,
-        ease: 'power3.out',
-      })
-    })
-  }
-
-  const handleDockMove = (event) => {
-    const pointerX = event.clientX
-
+  const applyDockEffect = (pointerX) => {
     iconRefs.current.forEach((icon) => {
       if (!icon) {
         return
@@ -110,6 +94,47 @@ function OverviewPage({ section, sliderCopies, toolIcons, theme }) {
       })
     })
   }
+
+  const resetDockEffect = () => {
+    dockHoverActiveRef.current = false
+    dockPointerXRef.current = null
+
+    iconRefs.current.forEach((icon) => {
+      if (!icon) {
+        return
+      }
+
+      gsap.to(icon, {
+        scale: 1,
+        y: 0,
+        filter: 'brightness(1)',
+        duration: 0.28,
+        ease: 'power3.out',
+      })
+    })
+  }
+
+  const handleDockMove = (event) => {
+    dockHoverActiveRef.current = true
+    dockPointerXRef.current = event.clientX
+    applyDockEffect(event.clientX)
+  }
+
+  useEffect(() => {
+    const tick = () => {
+      if (!dockHoverActiveRef.current || dockPointerXRef.current == null) {
+        return
+      }
+
+      applyDockEffect(dockPointerXRef.current)
+    }
+
+    gsap.ticker.add(tick)
+
+    return () => {
+      gsap.ticker.remove(tick)
+    }
+  }, [])
 
   return (
     <div className="flex h-full flex-col">

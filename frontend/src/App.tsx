@@ -1,4 +1,5 @@
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useEffect, useRef, useState } from 'react'
 import SectionHeader from './components/SectionHeader'
 import RightRail from './components/RightRail'
@@ -20,6 +21,8 @@ const pageComponents = {
 const sliderCopies = Array.from({ length: 6 }, (_, copy) => copy)
 const cursorSymbols = ['+', 'x', 'o', '::', '/']
 
+gsap.registerPlugin(ScrollTrigger)
+
 function App() {
   const [showWelcome, setShowWelcome] = useState(true)
   const [isEnteringPortfolio, setIsEnteringPortfolio] = useState(false)
@@ -30,6 +33,7 @@ function App() {
   ))
   const [showMobileNavLinks, setShowMobileNavLinks] = useState(true)
   const mobileSectionRefs = useRef({})
+  const mobileSectionBodyRefs = useRef({})
   const mobileNavHideTimeoutRef = useRef(null)
   const desktopTransitionRef = useRef(null)
   const cursorSymbolRefs = useRef([])
@@ -59,6 +63,30 @@ function App() {
 
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return undefined
+    }
+
+    const htmlNode = document.documentElement
+    const bodyNode = document.body
+    const previousHtmlOverflow = htmlNode.style.overflow
+    const previousBodyOverflow = bodyNode.style.overflow
+
+    if (showWelcome) {
+      htmlNode.style.overflow = 'hidden'
+      bodyNode.style.overflow = 'hidden'
+    } else {
+      htmlNode.style.overflow = ''
+      bodyNode.style.overflow = isMobile ? 'auto' : ''
+    }
+
+    return () => {
+      htmlNode.style.overflow = previousHtmlOverflow
+      bodyNode.style.overflow = previousBodyOverflow
+    }
+  }, [showWelcome, isMobile])
 
   useEffect(() => {
     const sectionNodes = sections
@@ -170,6 +198,52 @@ function App() {
 
     return () => ctx.revert()
   }, [activeSection, isMobile, showWelcome])
+
+  useEffect(() => {
+    if (!isMobile || showWelcome) {
+      return undefined
+    }
+
+    const sectionNodes = sections
+      .map((section) => ({
+        shell: mobileSectionRefs.current[section.id],
+        body: mobileSectionBodyRefs.current[section.id],
+      }))
+      .filter((entry) => entry.shell && entry.body)
+
+    if (sectionNodes.length === 0) {
+      return undefined
+    }
+
+    const ctx = gsap.context(() => {
+      sectionNodes.forEach(({ shell, body }, index) => {
+        gsap.set(body, {
+          autoAlpha: index === 0 ? 1 : 0,
+          y: index === 0 ? 0 : 34,
+        })
+
+        gsap.fromTo(body, {
+          autoAlpha: index === 0 ? 0 : 0,
+          y: index === 0 ? 18 : 34,
+        }, {
+          autoAlpha: 1,
+          y: 0,
+          duration: index === 0 ? 0.52 : 0.62,
+          ease: 'power3.out',
+          scrollTrigger: index === 0
+            ? undefined
+            : {
+                trigger: shell,
+                start: 'top 82%',
+                toggleActions: 'play none none none',
+                once: true,
+              },
+        })
+      })
+    })
+
+    return () => ctx.revert()
+  }, [isMobile, showWelcome, theme])
 
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId)
@@ -326,14 +400,20 @@ function App() {
                   data-section-id={section.id}
                   className="scroll-mt-6"
                 >
-                  <SectionHeader
-                    eyebrow={section.eyebrow}
-                    title={section.title}
-                    ghostWord={section.ghostWord}
-                    accentText={section.accentText}
-                    theme={theme}
-                  />
-                  <MobilePage section={section} sliderCopies={sliderCopies} toolIcons={toolIcons} theme={theme} />
+                  <div
+                    ref={(node) => {
+                      mobileSectionBodyRefs.current[section.id] = node
+                    }}
+                  >
+                    <SectionHeader
+                      eyebrow={section.eyebrow}
+                      title={section.title}
+                      ghostWord={section.ghostWord}
+                      accentText={section.accentText}
+                      theme={theme}
+                    />
+                    <MobilePage section={section} sliderCopies={sliderCopies} toolIcons={toolIcons} theme={theme} />
+                  </div>
                 </div>
               )
             })}

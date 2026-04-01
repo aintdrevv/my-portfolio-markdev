@@ -11,10 +11,11 @@ const welcomeImages = [
 const imagePositions = ['center center', 'center 40%', 'center center', 'center 30%']
 const cursorSymbols = ['+', 'x', 'o', '::', '/']
 const welcomeImageBaseScale = 1
+const mobileLoopRepeats = 3
 
 function WelcomeScreen({ onEnter, isExiting = false }) {
   const marqueeImages = [...welcomeImages, ...welcomeImages]
-  const mobileLoopImages = Array.from({ length: 6 }, () => welcomeImages).flat()
+  const mobileLoopImages = Array.from({ length: mobileLoopRepeats }, () => welcomeImages).flat()
   const rootRef = useRef(null)
   const buttonRef = useRef(null)
   const particlesRef = useRef(null)
@@ -25,6 +26,31 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
   const mobileGalleryViewportRef = useRef(null)
   const mobileLoopResetTimeoutRef = useRef(null)
   const imageRefs = useRef([])
+  const interactionEnabledRef = useRef(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return undefined
+    }
+
+    const finePointerQuery = window.matchMedia('(pointer: fine)')
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    const syncInteractionMode = () => {
+      interactionEnabledRef.current = finePointerQuery.matches && !reducedMotionQuery.matches && window.innerWidth >= 1024
+    }
+
+    syncInteractionMode()
+    finePointerQuery.addEventListener('change', syncInteractionMode)
+    reducedMotionQuery.addEventListener('change', syncInteractionMode)
+    window.addEventListener('resize', syncInteractionMode)
+
+    return () => {
+      finePointerQuery.removeEventListener('change', syncInteractionMode)
+      reducedMotionQuery.removeEventListener('change', syncInteractionMode)
+      window.removeEventListener('resize', syncInteractionMode)
+    }
+  }, [])
 
   useEffect(() => {
     const viewportNode = mobileGalleryViewportRef.current
@@ -33,7 +59,7 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
       return undefined
     }
 
-    const setWidth = () => viewportNode.scrollWidth / 6
+    const setWidth = () => viewportNode.scrollWidth / mobileLoopRepeats
 
     const centerLoop = () => {
       const singleSetWidth = setWidth()
@@ -58,9 +84,9 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
         }
 
         if (viewportNode.scrollLeft <= singleSetWidth * 0.5) {
-          viewportNode.scrollLeft += singleSetWidth * 2
-        } else if (viewportNode.scrollLeft >= singleSetWidth * 3.5) {
-          viewportNode.scrollLeft -= singleSetWidth * 2
+          viewportNode.scrollLeft += singleSetWidth
+        } else if (viewportNode.scrollLeft >= singleSetWidth * 2.5) {
+          viewportNode.scrollLeft -= singleSetWidth
         }
       }, 80)
     }
@@ -78,31 +104,6 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
       window.removeEventListener('resize', centerLoop)
     }
   }, [])
-
-  const handleMagneticMove = (event) => {
-    const button = event.currentTarget
-    const rect = button.getBoundingClientRect()
-    const offsetX = event.clientX - rect.left - (rect.width / 2)
-    const offsetY = event.clientY - rect.top - (rect.height / 2)
-
-    gsap.to(button, {
-      x: offsetX * 0.18,
-      y: offsetY * 0.22,
-      duration: 0.28,
-      ease: 'power3.out',
-      overwrite: 'auto',
-    })
-  }
-
-  const resetMagneticButton = (event) => {
-    gsap.to(event.currentTarget, {
-      x: 0,
-      y: 0,
-      duration: 0.45,
-      ease: 'elastic.out(1, 0.5)',
-      overwrite: 'auto',
-    })
-  }
 
   useEffect(() => {
     if (!rootRef.current || isExiting) {
@@ -185,15 +186,15 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
       }, '-=1.02')
 
       timeline.fromTo('[data-welcome-image] img', {
-        y: 64,
-        scale: welcomeImageBaseScale + 0.08,
+        y: 32,
+        scale: welcomeImageBaseScale + 0.04,
       }, {
         y: 0,
         scale: welcomeImageBaseScale,
-        duration: 0.8,
-        ease: 'back.out(1.45)',
-        stagger: 0.05,
-      }, '-=0.82')
+        duration: 0.56,
+        ease: 'power2.out',
+        stagger: 0.03,
+      }, '-=0.72')
 
     }, rootRef)
 
@@ -314,6 +315,10 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
   }
 
   const spawnCursorSymbol = (x, y) => {
+    if (!interactionEnabledRef.current) {
+      return
+    }
+
     const symbols = symbolRefs.current
 
     if (!symbols.length) {
@@ -359,6 +364,10 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
   }
 
   const handleMarqueeParallax = (event) => {
+    if (!interactionEnabledRef.current) {
+      return
+    }
+
     const marquee = marqueeRef.current
 
     if (!marquee) {
@@ -414,6 +423,10 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
   }
 
   const resetMarqueeParallax = () => {
+    if (!interactionEnabledRef.current) {
+      return
+    }
+
     imageRefs.current.forEach((image) => {
       if (!image) {
         return
@@ -434,6 +447,10 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
     <div
       ref={rootRef}
       onMouseMove={(event) => {
+        if (!interactionEnabledRef.current) {
+          return
+        }
+
         const rect = event.currentTarget.getBoundingClientRect()
         const nextX = event.clientX - rect.left
         const nextY = event.clientY - rect.top
@@ -463,9 +480,9 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
         </span>
       ))}
       <div className="grid h-full min-h-0 grid-cols-1 lg:grid-cols-[0.92fr_1.08fr]">
-        <div data-welcome-panel className="flex min-h-0 flex-col justify-end px-0 pt-8 pb-0 sm:pt-10 lg:justify-center lg:px-12 lg:py-10 xl:px-16">
-          <div className="w-full">
-            <div className="flex min-h-[48svh] items-center">
+        <div data-welcome-panel className="flex min-h-0 flex-col px-0 pt-8 pb-0 sm:pt-10 lg:justify-center lg:px-12 lg:py-10 xl:px-16">
+          <div className="flex h-full min-h-0 flex-col">
+            <div className="flex min-h-0 flex-1 items-center pb-6 sm:pb-8 lg:pb-0">
               <div className="max-w-[30rem] px-6 sm:px-8 lg:px-0">
               <p data-welcome-kicker className="font-dm-mono text-[0.68rem] uppercase tracking-[0.34em] text-white/34">
               Welcome
@@ -484,8 +501,6 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
                 ref={buttonRef}
                 type="button"
                 onClick={handleEnterClick}
-                onMouseMove={handleMagneticMove}
-                onMouseLeave={resetMagneticButton}
                 className="mt-10 inline-flex h-12 items-center bg-white px-6 text-sm font-medium uppercase tracking-[0.18em] text-[#0d0f11] transition hover:bg-[#93a66b]"
               >
                 Enter Portfolio
@@ -495,7 +510,7 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
 
             <div
               ref={mobileGalleryViewportRef}
-              className="mobile-welcome-gallery mt-auto w-full snap-x snap-mandatory overflow-x-auto pb-0 lg:hidden"
+              className="mobile-welcome-gallery h-[40svh] w-full shrink-0 snap-x snap-mandatory overflow-x-auto pb-0 lg:hidden"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -515,6 +530,8 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
                       alt=""
                       aria-hidden="true"
                       className="block h-full w-full object-cover"
+                      loading={index < welcomeImages.length ? 'eager' : 'lazy'}
+                      decoding="async"
                       style={{ objectPosition: imagePositions[index % welcomeImages.length] }}
                       draggable={false}
                     />
@@ -544,6 +561,8 @@ function WelcomeScreen({ onEnter, isExiting = false }) {
                   alt=""
                   aria-hidden="true"
                   className="block h-full w-full object-cover"
+                  loading={index < 2 ? 'eager' : 'lazy'}
+                  decoding="async"
                   style={{ objectPosition: imagePositions[index % welcomeImages.length] }}
                   draggable={false}
                 />

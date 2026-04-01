@@ -27,6 +27,7 @@ const sectionIcons = {
 
 function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTheme, theme }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [menuVisible, setMenuVisible] = useState(false)
   const [currentTime, setCurrentTime] = useState(() =>
     new Intl.DateTimeFormat('en-PH', {
       hour: '2-digit',
@@ -37,9 +38,9 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
     }).format(new Date()),
   )
   const menuRef = useRef(null)
-  const avatarWrapRef = useRef(null)
-  const avatarRingRef = useRef(null)
-  const avatarInnerRef = useRef(null)
+  const sidebarShellRef = useRef(null)
+  const menuPanelRef = useRef(null)
+  const menuItemRefs = useRef([])
   const isLightTheme = theme === 'light'
 
   useEffect(() => {
@@ -73,89 +74,155 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
   }, [])
 
   useEffect(() => {
-    const ring = avatarRingRef.current
-    const wrap = avatarWrapRef.current
-    const inner = avatarInnerRef.current
+    const shell = sidebarShellRef.current
 
-    if (!ring || !wrap || !inner) {
+    if (!shell) {
       return undefined
     }
 
-    const ringLength = ring.getTotalLength()
-    const baseColor = isLightTheme ? '#7f8f5c' : '#93a66b'
-    gsap.set(ring, {
-      strokeDasharray: ringLength,
-      strokeDashoffset: ringLength,
-      stroke: baseColor,
+    const nodes = shell.querySelectorAll('[data-sidebar-entrance]')
+
+    if (!nodes.length) {
+      return undefined
+    }
+
+    const timeline = gsap.timeline({
+      defaults: {
+        ease: 'power4.out',
+      },
     })
 
-    gsap.set(wrap, {
-      rotate: -110,
-      scale: 0.92,
-      transformOrigin: '50% 50%',
-    })
-
-    gsap.set(inner, {
-      scale: 0.96,
-      transformOrigin: '50% 50%',
-    })
-
-    const intro = gsap.timeline()
-    intro.to(wrap, {
-      rotate: 0,
+    timeline.fromTo(shell, {
+      autoAlpha: 0,
+      x: -42,
+      scale: 0.97,
+    }, {
+      autoAlpha: 1,
+      x: 0,
       scale: 1,
-      duration: 0.9,
-      ease: 'power3.out',
-    }, 0)
-    intro.to(ring, {
-      strokeDashoffset: 0,
-      duration: 1.1,
-      ease: 'power2.out',
-    }, 0.05)
-    intro.to(inner, {
-      scale: 1,
-      duration: 0.7,
-      ease: 'back.out(1.7)',
-    }, 0.08)
+      duration: 0.62,
+    })
+
+    timeline.fromTo(nodes, {
+      autoAlpha: 0,
+      x: -18,
+      y: 24,
+    }, {
+      autoAlpha: 1,
+      x: 0,
+      y: 0,
+      duration: 0.58,
+      stagger: 0.1,
+    }, '-=0.38')
 
     return () => {
-      intro.kill()
-      gsap.killTweensOf([ring, wrap, inner])
+      timeline.kill()
+      gsap.killTweensOf([shell, ...nodes])
     }
-  }, [isLightTheme])
+  }, [])
+
+  useEffect(() => {
+    const panel = menuPanelRef.current
+    const items = menuItemRefs.current.filter(Boolean)
+
+    if (menuOpen) {
+      setMenuVisible(true)
+      return undefined
+    }
+
+    if (!menuVisible || !panel) {
+      return undefined
+    }
+
+    const timeline = gsap.timeline({
+      defaults: {
+        ease: 'power2.inOut',
+      },
+      onComplete: () => {
+        setMenuVisible(false)
+      },
+    })
+
+    if (items.length) {
+      timeline.to(items, {
+        autoAlpha: 0,
+        y: 0,
+        duration: 0.14,
+        stagger: 0,
+      }, 0)
+    }
+
+    timeline.to(panel, {
+      autoAlpha: 0,
+      scaleY: 0.72,
+      transformOrigin: 'top center',
+      duration: 0.2,
+    }, 0)
+
+    return () => {
+      timeline.kill()
+      gsap.killTweensOf([panel, ...items])
+    }
+  }, [menuOpen, menuVisible])
+
+  useEffect(() => {
+    const panel = menuPanelRef.current
+    const items = menuItemRefs.current.filter(Boolean)
+
+    if (!menuOpen || !menuVisible || !panel) {
+      return undefined
+    }
+
+    const timeline = gsap.timeline({
+      defaults: {
+        ease: 'cubic.out',
+      },
+    })
+
+    timeline.fromTo(panel, {
+      autoAlpha: 0,
+      y: 0,
+      scaleY: 0.72,
+      transformOrigin: 'top center',
+    }, {
+      autoAlpha: 1,
+      y: 0,
+      scaleY: 1,
+      duration: 0.32,
+    }, 0)
+
+    if (items.length) {
+      timeline.fromTo(items, {
+        autoAlpha: 0,
+        y: 8,
+      }, {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.22,
+        stagger: 0,
+      }, 0)
+    }
+
+    return () => {
+      timeline.kill()
+      gsap.killTweensOf([panel, ...items])
+    }
+  }, [menuOpen, menuVisible])
 
   return (
-    <aside className={`relative z-20 flex flex-col justify-between px-5 pt-5 pb-6 sm:px-6 sm:pt-6 lg:h-full lg:px-8 lg:pt-8 lg:pb-12 ${
+    <aside ref={sidebarShellRef} className={`relative z-20 flex flex-col justify-between px-5 pt-5 pb-6 sm:px-6 sm:pt-6 lg:h-full lg:px-8 lg:pt-8 lg:pb-12 ${
       isLightTheme
         ? 'border-b border-[rgba(36,40,31,0.08)] bg-[rgba(255,255,255,0.72)] shadow-[0_0_0_1px_rgba(255,255,255,0.18)] backdrop-blur-xl lg:border-r lg:border-b-0'
         : 'bg-[#0d0f11]'
     }`}>
       <div className="relative space-y-6 lg:space-y-6">
-        <div className="w-full">
+        <div data-sidebar-entrance className="relative z-50 w-full">
           <div ref={menuRef} className={`relative -mx-5 flex items-center gap-4 px-5 py-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
             isLightTheme ? 'bg-[rgba(93,111,63,0.08)]' : 'bg-white/[0.04]'
           }`}>
-          <div ref={avatarWrapRef} className="relative flex h-[4.5rem] w-[4.5rem] items-center justify-center">
-            <svg
-              viewBox="0 0 84 84"
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
-            >
-              <circle
-                ref={avatarRingRef}
-                cx="42"
-                cy="42"
-                r="38"
-                fill="none"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeDasharray="4 7"
-                opacity="0.95"
-              />
-            </svg>
+          <div className="relative flex h-[4.1rem] w-[4.1rem] items-center justify-center">
             <div
-              ref={avatarInnerRef}
-              className={`relative flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full ${
+              className={`relative flex h-[4.1rem] w-[4.1rem] items-center justify-center rounded-full ${
                 isLightTheme ? 'bg-[rgba(93,111,63,0.08)] text-[#3b4230]' : 'bg-white/[0.04] text-white/72'
               }`}
             >
@@ -193,8 +260,8 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                   </div>
                 </div>
 
-                {menuOpen ? (
-                  <div className={`dropdown-panel absolute top-full left-0 right-0 z-30 p-1.5 ${
+                {menuVisible ? (
+                  <div ref={menuPanelRef} className={`absolute top-full left-0 right-0 z-50 p-1.5 ${
                     isLightTheme ? 'bg-[#edf1e3]' : 'bg-[#171a1d]'
                   }`}>
                     <div className="grid grid-cols-1 gap-1 lg:hidden">
@@ -204,12 +271,15 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                         return (
                           <button
                             key={section.id}
+                            ref={(node) => {
+                              menuItemRefs.current[sections.findIndex((item) => item.id === section.id)] = node
+                            }}
                             type="button"
                             onClick={() => {
                               onSectionChange(section.id)
                               setMenuOpen(false)
                             }}
-                            className={`dropdown-item nav-link-hover relative flex min-w-0 items-center justify-between overflow-hidden px-3 py-2 text-left text-sm transition-colors duration-300 ${
+                            className={`nav-link-hover relative flex min-w-0 items-center justify-between overflow-hidden px-3 py-2 text-left text-sm transition-colors duration-300 ${
                               isLightTheme
                                 ? isActive
                                   ? 'bg-[rgba(93,111,63,0.1)] text-[#24281f]'
@@ -218,7 +288,6 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                                   ? 'bg-white/[0.06] text-white'
                                   : 'text-white/65 hover:text-white/90'
                             }`}
-                            style={{ animationDelay: `${110 + (sections.findIndex((item) => item.id === section.id) * 40)}ms` }}
                           >
                             {!isActive ? (
                               <span
@@ -247,16 +316,18 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                       <div className={`my-1 h-px ${isLightTheme ? 'bg-[rgba(36,40,31,0.08)]' : 'bg-white/8'}`} />
                     </div>
                     <a
+                      ref={(node) => {
+                        menuItemRefs.current[sections.length] = node
+                      }}
                       href="/Dev.pdf"
                       target="_blank"
                       rel="noreferrer"
                       onClick={() => setMenuOpen(false)}
-                      className={`dropdown-item flex items-center justify-between px-3 py-2 text-sm transition ${
+                      className={`flex items-center justify-between px-3 py-2 text-sm transition ${
                         isLightTheme
                           ? 'text-[#3b4230] hover:bg-[rgba(93,111,63,0.08)] hover:text-[#24281f]'
                           : 'text-white/82 hover:bg-white/[0.05] hover:text-white'
                       }`}
-                      style={{ animationDelay: '110ms' }}
                     >
                       <span>Resume</span>
                       <span className={`text-xs uppercase tracking-[0.18em] ${
@@ -270,7 +341,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
           </div>
         </div>
 
-        <div className="space-y-4 pt-4 lg:hidden">
+        <div data-sidebar-entrance className="relative z-0 space-y-4 pt-4 lg:hidden">
           <p className={`max-w-[42ch] text-sm leading-6 ${
             isLightTheme ? 'text-[#3b4230]' : 'text-white/72'
           }`}>
@@ -323,7 +394,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
           </div>
         </div>
 
-        <div className="hidden space-y-4 lg:block">
+        <div data-sidebar-entrance className="relative z-0 hidden space-y-4 lg:block">
           <p className={`max-w-[42ch] pr-2 text-sm leading-6 ${
             isLightTheme ? 'text-[#3b4230]' : 'text-white/72'
           }`}>
@@ -372,7 +443,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
           isLightTheme ? 'bg-[rgba(36,40,31,0.08)]' : 'bg-white/8'
         }`} />
 
-        <nav className="hidden lg:block lg:space-y-2">
+        <nav data-sidebar-entrance className="relative z-0 hidden lg:block lg:space-y-2">
           {sections.map((section) => {
             const isActive = section.id === activeSection
 
@@ -418,7 +489,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
         </nav>
       </div>
 
-      <footer className={`relative mt-6 hidden space-y-2 pb-1 text-sm lg:block lg:mt-0 lg:space-y-3 ${
+      <footer data-sidebar-entrance className={`relative z-0 mt-6 hidden space-y-2 pb-1 text-sm lg:block lg:mt-0 lg:space-y-3 ${
         isLightTheme ? 'text-[#4e5641]' : 'text-white/58'
       }`}>
         <p className={`leading-6 ${isLightTheme ? 'text-[#4e5641]' : 'text-white/58'}`}>2026 Mark Macaraig</p>
