@@ -2,10 +2,10 @@ import gsap from 'gsap'
 import { useEffect, useRef } from 'react'
 
 const welcomeImages = [
-  '/store-unsplash.jpg',
-  '/sakura-unsplash.jpg',
-  '/shadow-unsplash.jpg',
-  '/bike-unsplash.jpg',
+  '/images/store-unsplash.jpg',
+  '/images/sakura-unsplash.jpg',
+  '/images/shadow-unsplash.jpg',
+  '/images/bike-unsplash.jpg',
 ]
 
 const imagePositions = ['center center', 'center 40%', 'center center', 'center 30%']

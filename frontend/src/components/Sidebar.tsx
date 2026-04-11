@@ -324,7 +324,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                       ref={(node) => {
                         menuItemRefs.current[sections.length] = node
                       }}
-                      href="/Dev.pdf"
+                      href="/docs/Dev.pdf"
                       target="_blank"
                       rel="noreferrer"
                       onClick={() => setMenuOpen(false)}

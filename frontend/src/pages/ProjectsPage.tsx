@@ -2,9 +2,9 @@ import gsap from 'gsap'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 const fallbackPanels = [
-  { id: 'store', src: '/store-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
-  { id: 'bike', src: '/bike-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
-  { id: 'shadow', src: '/shadow-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
+  { id: 'store', src: '/images/store-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
+  { id: 'bike', src: '/images/bike-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
+  { id: 'shadow', src: '/images/shadow-unsplash.jpg', objectPosition: 'center center', imageScale: 1 },
 ]
 
 const XANO_PICTURES_URL = 'https://x8ki-letl-twmt.n7.xano.io/api:4Sxa9QnL/list'
