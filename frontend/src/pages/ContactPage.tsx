@@ -157,10 +157,10 @@ function ContactPage({ theme }) {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex flex-1 flex-col py-5 lg:py-8">
-        <div className="contact-form-panel mx-auto my-auto w-full max-w-[42rem] p-4 sm:p-5 lg:p-6">
-          <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col py-4 lg:py-5">
+        <div className="contact-form-panel mx-auto my-auto w-full max-w-[40rem] p-4 sm:p-5 lg:p-5">
+          <div className="flex flex-col gap-3 border-b border-white/10 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium text-white">Contact Form</p>
               <p className="mt-1 text-xs uppercase tracking-[0.22em] text-white/34">
@@ -173,8 +173,8 @@ function ContactPage({ theme }) {
             </div>
           </div>
 
-          <div className="grid gap-4 py-5">
-            <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 py-4">
+            <div className="grid gap-3 sm:grid-cols-2">
               <label className="grid gap-2">
                 <span className="text-[0.68rem] uppercase tracking-[0.2em] text-white/34">Name</span>
                 <input
@@ -182,7 +182,7 @@ function ContactPage({ theme }) {
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Your name"
-                  className="contact-form-field rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
+                  className="contact-form-field rounded-md border border-white/10 bg-white/[0.035] px-4 py-2.5 text-sm text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
                 />
               </label>
 
@@ -193,7 +193,7 @@ function ContactPage({ theme }) {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="you@example.com"
-                  className="contact-form-field rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
+                  className="contact-form-field rounded-md border border-white/10 bg-white/[0.035] px-4 py-2.5 text-sm text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
                 />
               </label>
             </div>
@@ -205,7 +205,7 @@ function ContactPage({ theme }) {
                 value={subject}
                 onChange={(event) => setSubject(event.target.value)}
                 placeholder="Project inquiry"
-                className="contact-form-field rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
+                className="contact-form-field rounded-md border border-white/10 bg-white/[0.035] px-4 py-2.5 text-sm text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
               />
             </label>
 
@@ -216,7 +216,7 @@ function ContactPage({ theme }) {
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 placeholder="Write your message here..."
-                className="contact-form-field min-h-[10rem] resize-none rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-7 text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20"
+                className="contact-form-field min-h-[8.25rem] resize-none rounded-md border border-white/10 bg-white/[0.035] px-4 py-2.5 text-sm leading-6 text-white/86 outline-none transition placeholder:text-white/30 focus:border-white/20 lg:min-h-[7.5rem]"
               ></textarea>
             </label>
 
@@ -232,7 +232,7 @@ function ContactPage({ theme }) {
               </p>
             ) : null}
 
-            <div className="flex flex-col gap-4 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-t border-white/10 pt-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3 text-sm text-white/52">
                 <span>Available through</span>
                 <div className="flex items-center gap-3">
@@ -255,7 +255,7 @@ function ContactPage({ theme }) {
                 onClick={handleSend}
                 onMouseMove={handleMagneticMove}
                 onMouseLeave={resetMagneticButton}
-                className="inline-flex h-11 items-center justify-center rounded-md border border-white/12 bg-white/[0.04] px-5 text-sm text-slate-100 transition hover:bg-[#93a66b]/12 hover:text-white"
+                className="inline-flex h-10 items-center justify-center rounded-md border border-white/12 bg-white/[0.04] px-5 text-sm text-slate-100 transition hover:bg-[#93a66b]/12 hover:text-white"
               >
                 <span ref={buttonTextRef} className="inline-flex items-center">
                   Send
@@ -266,7 +266,9 @@ function ContactPage({ theme }) {
         </div>
       </div>
 
-      <SectionFooterCards theme={theme} />
+      <div className="mt-auto shrink-0">
+        <SectionFooterCards theme={theme} />
+      </div>
     </div>
   )
 }

@@ -310,14 +310,14 @@ function App() {
   }
 
   return (
-    <main className={`min-h-screen lg:h-screen lg:overflow-hidden ${isLightTheme ? 'light-theme bg-[#cdd6b6] text-[#24281f]' : 'bg-[#111315] text-slate-100'}`}>
+    <main className={`min-h-screen min-h-[100dvh] lg:h-[100dvh] lg:min-h-[100dvh] lg:overflow-hidden ${isLightTheme ? 'light-theme bg-[#cdd6b6] text-[#24281f]' : 'bg-[#111315] text-slate-100'}`}>
       {showWelcome ? (
         <WelcomeScreen
           onEnter={handleEnterPortfolio}
           isExiting={isEnteringPortfolio}
         />
       ) : null}
-      <div className={`mx-auto flex min-h-screen max-w-[1528px] flex-col lg:grid lg:h-full lg:min-h-0 lg:grid-cols-[340px_minmax(0,1fr)_40px] ${
+      <div className={`mx-auto flex min-h-screen min-h-[100dvh] max-w-[1528px] flex-col lg:grid lg:h-full lg:min-h-0 lg:overflow-hidden lg:grid-cols-[minmax(352px,23.5rem)_minmax(0,1fr)_40px] ${
         isEnteringPortfolio ? 'portfolio-entering' : 'portfolio-entered'
       }`}>
         <Sidebar

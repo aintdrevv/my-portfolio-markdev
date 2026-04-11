@@ -25,17 +25,21 @@ const sectionIcons = {
   ),
 }
 
+const manilaTimeFormatter = new Intl.DateTimeFormat('en-PH', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+  timeZone: 'Asia/Manila',
+})
+
+const sidebarIntroCopy = 'Frontend-focused creator crafting simple, refined, and modern digital experiences.'
+
 function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTheme, theme }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuVisible, setMenuVisible] = useState(false)
   const [currentTime, setCurrentTime] = useState(() =>
-    new Intl.DateTimeFormat('en-PH', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      timeZone: 'Asia/Manila',
-    }).format(new Date()),
+    manilaTimeFormatter.format(new Date()),
   )
   const menuRef = useRef(null)
   const sidebarShellRef = useRef(null)
@@ -56,16 +60,8 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
   }, [])
 
   useEffect(() => {
-    const formatter = new Intl.DateTimeFormat('en-PH', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      timeZone: 'Asia/Manila',
-    })
-
     const updateTime = () => {
-      setCurrentTime(formatter.format(new Date()))
+      setCurrentTime(manilaTimeFormatter.format(new Date()))
     }
 
     const intervalId = window.setInterval(updateTime, 1000)
@@ -209,45 +205,54 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
     }
   }, [menuOpen, menuVisible])
 
+  const handleSocialClick = (event, socialId) => {
+    if (socialId !== 'gmail') {
+      return
+    }
+
+    event.preventDefault()
+    onSectionChange('contact')
+  }
+
   return (
-    <aside ref={sidebarShellRef} className={`relative z-20 flex flex-col justify-between px-5 pt-5 pb-6 sm:px-6 sm:pt-6 lg:h-full lg:px-8 lg:pt-8 lg:pb-12 ${
+    <aside ref={sidebarShellRef} className={`relative z-20 flex min-w-0 flex-col justify-between px-5 pt-5 pb-6 sm:px-6 sm:pt-6 lg:h-full lg:px-8 lg:pt-8 lg:pb-12 ${
       isLightTheme
         ? 'border-b border-[rgba(36,40,31,0.08)] bg-[rgba(255,255,255,0.72)] shadow-[0_0_0_1px_rgba(255,255,255,0.18)] backdrop-blur-xl lg:border-r lg:border-b-0'
         : 'bg-[#0d0f11]'
     }`}>
       <div className="relative space-y-6 lg:space-y-6">
         <div data-sidebar-entrance className="relative z-50 w-full">
-          <div ref={menuRef} className={`relative -mx-5 flex items-center gap-4 px-5 py-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 ${
+          <div ref={menuRef} className={`relative -mx-5 flex items-start gap-3 px-5 py-4 sm:-mx-6 sm:gap-4 sm:px-6 lg:-mx-8 lg:px-8 w-[calc(100%+2.5rem)] sm:w-[calc(100%+3rem)] lg:w-[calc(100%+4rem)] ${
             isLightTheme ? 'bg-[rgba(93,111,63,0.08)]' : 'bg-white/[0.04]'
           }`}>
-          <div className="relative flex h-[4.1rem] w-[4.1rem] items-center justify-center">
+          <div className="relative flex h-[3.15rem] w-[3.15rem] shrink-0 items-center justify-center sm:h-[3.45rem] sm:w-[3.45rem]">
             <div
-              className={`relative flex h-[4.1rem] w-[4.1rem] items-center justify-center rounded-full ${
+              className={`relative flex h-[3.15rem] w-[3.15rem] items-center justify-center rounded-full sm:h-[3.45rem] sm:w-[3.45rem] ${
                 isLightTheme ? 'bg-[rgba(93,111,63,0.08)] text-[#3b4230]' : 'bg-white/[0.04] text-white/72'
               }`}
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-9 w-9 fill-current">
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 fill-current sm:h-7 sm:w-7">
                 <path d="M12 12a4.25 4.25 0 1 0 0-8.5A4.25 4.25 0 0 0 12 12Zm0 2.25c-4.15 0-7.5 2.35-7.5 5.25 0 .55.45 1 1 1h13c.55 0 1-.45 1-1 0-2.9-3.35-5.25-7.5-5.25Z" />
               </svg>
             </div>
           </div>
-            <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-              <div>
-                <h1 className={`text-xl font-semibold tracking-[-0.04em] sm:text-2xl ${
+            <div className="flex min-w-0 flex-1 items-start justify-between gap-2 sm:gap-3">
+              <div className="min-w-0 flex-1 pr-1">
+                <h1 className={`max-w-full text-[clamp(1rem,0.94rem+0.32vw,1.3rem)] font-semibold leading-tight tracking-[-0.04em] break-words ${
                   isLightTheme ? 'text-[#24281f]' : 'text-white'
                 }`}>Mark Macaraig</h1>
-                <p className="mt-2 text-[0.65rem] uppercase tracking-[0.35em] text-[#93a66b]">
+                <p className="mt-1.5 text-[0.48rem] leading-relaxed uppercase tracking-[0.18em] text-[#93a66b] sm:mt-2 sm:text-[0.52rem] sm:tracking-[0.22em]">
                   Frontend Developer
                 </p>
               </div>
-              <div className="shrink-0">
+              <div className="shrink-0 self-center pt-1 sm:pt-1.5">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setMenuOpen((open) => !open)}
                     aria-label="Open quick actions"
                     aria-expanded={menuOpen}
-                    className={`inline-flex h-9 w-9 items-center justify-center border text-base transition ${
+                    className={`inline-flex h-8 w-8 items-center justify-center border text-[0.95rem] transition sm:h-[2.1rem] sm:w-[2.1rem] ${
                       isLightTheme
                         ? 'border-[rgba(36,40,31,0.12)] bg-[rgba(93,111,63,0.08)] text-[#3b4230] hover:border-[rgba(36,40,31,0.18)] hover:bg-[rgba(93,111,63,0.12)] hover:text-[#24281f]'
                         : 'border-white/10 bg-white/[0.04] text-white/80 hover:border-white/16 hover:bg-white/[0.07] hover:text-white'
@@ -265,21 +270,21 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                     isLightTheme ? 'bg-[#edf1e3]' : 'bg-[#171a1d]'
                   }`}>
                     <div className="grid grid-cols-1 gap-1 lg:hidden">
-                      {sections.map((section) => {
+                      {sections.map((section, index) => {
                         const isActive = section.id === activeSection
 
                         return (
                           <button
                             key={section.id}
                             ref={(node) => {
-                              menuItemRefs.current[sections.findIndex((item) => item.id === section.id)] = node
+                              menuItemRefs.current[index] = node
                             }}
                             type="button"
                             onClick={() => {
                               onSectionChange(section.id)
                               setMenuOpen(false)
                             }}
-                            className={`nav-link-hover relative flex min-w-0 items-center justify-between overflow-hidden px-3 py-2 text-left text-sm transition-colors duration-300 ${
+                            className={`nav-link-hover relative flex min-w-0 items-center justify-between overflow-hidden px-3 py-2 text-left text-[0.82rem] transition-colors duration-300 ${
                               isLightTheme
                                 ? isActive
                                   ? 'bg-[rgba(93,111,63,0.1)] text-[#24281f]'
@@ -303,7 +308,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                               }`}>
                                 {sectionIcons[section.id]}
                               </span>
-                              <span className="block text-sm font-medium tracking-[0.01em]">
+                              <span className="block text-[0.82rem] font-medium tracking-[0.01em]">
                                 {section.label}
                               </span>
                             </span>
@@ -323,7 +328,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                       target="_blank"
                       rel="noreferrer"
                       onClick={() => setMenuOpen(false)}
-                      className={`flex items-center justify-between px-3 py-2 text-sm transition ${
+                      className={`flex items-center justify-between px-3 py-2 text-[0.82rem] transition ${
                         isLightTheme
                           ? 'text-[#3b4230] hover:bg-[rgba(93,111,63,0.08)] hover:text-[#24281f]'
                           : 'text-white/82 hover:bg-white/[0.05] hover:text-white'
@@ -342,50 +347,43 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
         </div>
 
         <div data-sidebar-entrance className="relative z-0 space-y-4 pt-4 lg:hidden">
-          <p className={`max-w-[42ch] text-sm leading-6 ${
+          <p className={`max-w-[42ch] text-[0.9rem] leading-6 ${
             isLightTheme ? 'text-[#3b4230]' : 'text-white/72'
           }`}>
-            Frontend-focused creator crafting simple, refined, and modern digital experiences.
+            {sidebarIntroCopy}
           </p>
-          <p className={`text-[0.62rem] uppercase tracking-[0.3em] ${
+          <p className={`text-[0.56rem] uppercase tracking-[0.24em] ${
             isLightTheme ? 'text-[#5e6550]' : 'text-white/34'
           }`}>
             Available for updates
           </p>
-          <p className={`text-[0.62rem] uppercase tracking-[0.3em] ${
+          <p className={`text-[0.56rem] uppercase tracking-[0.24em] ${
             isLightTheme ? 'text-[#5e6550]' : 'text-white/34'
           }`}>
             Social Links
           </p>
           <div className="w-full">
             <div className="flex w-full items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 {socials.map((social) => (
                   <a
                     key={social.id}
                     href={social.href}
                     aria-label={social.label}
-                    onClick={(event) => {
-                      if (social.id !== 'gmail') {
-                        return
-                      }
-
-                      event.preventDefault()
-                      onSectionChange('contact')
-                    }}
+                    onClick={(event) => handleSocialClick(event, social.id)}
                     className={`transition ${
                       isLightTheme
                         ? 'text-[#4e5641] hover:text-[#24281f]'
                         : 'text-white/72 hover:text-white'
                     }`}
                   >
-                    <span className="flex h-5 w-5 items-center justify-center">
+                    <span className="flex h-4 w-4 items-center justify-center">
                       {social.icon}
                     </span>
                   </a>
                 ))}
               </div>
-              <span className={`shrink-0 font-dm-mono text-[0.62rem] uppercase tracking-[0.2em] ${
+              <span className={`shrink-0 font-dm-mono text-[0.55rem] uppercase tracking-[0.16em] ${
                 isLightTheme ? 'text-[#5e6550]' : 'text-white/34'
               }`}>
                 {currentTime}
@@ -395,12 +393,12 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
         </div>
 
         <div data-sidebar-entrance className="relative z-0 hidden space-y-4 lg:block">
-          <p className={`max-w-[42ch] pr-2 text-sm leading-6 ${
+          <p className={`max-w-[42ch] pr-2 text-[0.9rem] leading-6 ${
             isLightTheme ? 'text-[#3b4230]' : 'text-white/72'
           }`}>
-            Frontend-focused creator crafting simple, refined, and modern digital experiences.
+            {sidebarIntroCopy}
           </p>
-          <div className={`inline-flex rounded-full border px-2.5 py-0.5 text-[0.58rem] uppercase tracking-[0.28em] ${
+          <div className={`inline-flex rounded-full border px-2.5 py-0.5 text-[0.52rem] uppercase tracking-[0.22em] ${
             isLightTheme
               ? 'border-[rgba(36,40,31,0.12)] bg-[rgba(93,111,63,0.08)] text-[#4e5641]'
               : 'border-white/10 bg-white/[0.04] text-white/70'
@@ -410,24 +408,17 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
         </div>
 
         <div className="hidden space-y-3 lg:block">
-          <p className={`text-[0.62rem] uppercase tracking-[0.3em] ${
+          <p className={`text-[0.56rem] uppercase tracking-[0.24em] ${
             isLightTheme ? 'text-[#5e6550]' : 'text-white/34'
           }`}>Social Links</p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {socials.map((social) => (
               <a
                 key={social.id}
                 href={social.href}
                 aria-label={social.label}
-                onClick={(event) => {
-                  if (social.id !== 'gmail') {
-                    return
-                  }
-
-                  event.preventDefault()
-                  onSectionChange('contact')
-                }}
-                className={`flex h-10 w-10 items-center justify-center rounded-full transition ${
+                onClick={(event) => handleSocialClick(event, social.id)}
+                className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
                   isLightTheme
                     ? 'bg-[rgba(93,111,63,0.08)] text-[#4e5641] hover:bg-[rgba(93,111,63,0.12)] hover:text-[#24281f]'
                     : 'bg-white/[0.04] text-white/72 hover:bg-white/[0.07] hover:text-white'
@@ -476,7 +467,7 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
                   }`}>
                     {sectionIcons[section.id]}
                   </span>
-                  <span className="block text-sm font-medium tracking-[0.01em]">
+                  <span className="block text-[0.82rem] font-medium tracking-[0.01em]">
                     {section.label}
                   </span>
                 </span>
@@ -489,11 +480,11 @@ function Sidebar({ sections, socials, activeSection, onSectionChange, onToggleTh
         </nav>
       </div>
 
-      <footer data-sidebar-entrance className={`relative z-0 mt-6 hidden space-y-2 pb-1 text-sm lg:block lg:mt-0 lg:space-y-3 ${
+      <footer data-sidebar-entrance className={`relative z-0 mt-6 hidden space-y-1.5 pb-1 text-[0.78rem] lg:block lg:mt-0 lg:space-y-2 ${
         isLightTheme ? 'text-[#4e5641]' : 'text-white/58'
       }`}>
-        <p className={`leading-6 ${isLightTheme ? 'text-[#4e5641]' : 'text-white/58'}`}>2026 Mark Macaraig</p>
-        <p className={`max-w-[26ch] leading-6 ${isLightTheme ? 'text-[#6b735d]' : 'text-white/34'}`}>Frontend Developer based in the Philippines</p>
+        <p className={`leading-5 ${isLightTheme ? 'text-[#4e5641]' : 'text-white/58'}`}>2026 Mark Macaraig</p>
+        <p className={`max-w-[26ch] text-[0.72rem] leading-5 ${isLightTheme ? 'text-[#6b735d]' : 'text-white/34'}`}>Frontend Developer based in the Philippines</p>
       </footer>
     </aside>
   )

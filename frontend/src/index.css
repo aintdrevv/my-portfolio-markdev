@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Poppins:wght@400;500;600&family=Space+Grotesk:wght@500&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -18,6 +17,11 @@ body,
 #root {
   height: 100%;
   margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -44,8 +48,8 @@ body {
 }
 
 .marquee-mask {
-  --icon-size: 3.5rem;
-  --icon-gap: 0.875rem;
+  --icon-size: 2.9rem;
+  --icon-gap: 0.65rem;
   --icon-count: 8;
   --track-width: calc(
     (var(--icon-size) * var(--icon-count)) +
@@ -55,9 +59,10 @@ body {
   min-width: 0;
   max-width: 100%;
   overflow-x: hidden;
-  overflow-y: visible;
-  padding-top: 1.5rem;
-  margin-top: -1.5rem;
+  overflow-y: hidden;
+  padding-top: 1.35rem;
+  padding-bottom: 0.45rem;
+  margin-top: 0;
 }
 
 .marquee-viewport {

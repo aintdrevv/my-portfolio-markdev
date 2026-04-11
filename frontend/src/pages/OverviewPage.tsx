@@ -5,14 +5,17 @@ import SectionFooterCards from '../components/SectionFooterCards'
 
 gsap.registerPlugin(ScrollTrigger)
 
+const overviewFooterTitle = 'Portfolio Purpose'
+const overviewFooterBody = 'This portfolio serves as a simple presentation of my work, skills, and growth as a frontend developer.'
+
 function TaggedPoint({ tag, text }) {
   return (
-    <div className="flex h-full w-full items-center border-l-4 border-white/18 bg-white/[0.025] px-5 py-5 lg:ml-auto lg:w-[92%] lg:px-6 lg:py-6">
-      <div className="space-y-4">
-        <span className="inline-flex border border-white/14 bg-white/[0.04] px-3 py-1 text-[0.62rem] uppercase tracking-[0.22em] text-white/65">
+    <div className="flex h-full w-full items-center border-l-4 border-white/18 bg-white/[0.025] px-4 py-3.5 lg:ml-auto lg:w-[92%] lg:px-4.5 lg:py-3.5">
+      <div className="space-y-2.5">
+        <span className="inline-flex border border-white/14 bg-white/[0.04] px-2.5 py-1 text-[0.54rem] uppercase tracking-[0.16em] text-white/65">
           {tag}
         </span>
-        <p className="text-base leading-8 text-slate-300">{text}</p>
+        <p className="text-[0.88rem] leading-6 text-slate-300">{text}</p>
       </div>
     </div>
   )
@@ -24,6 +27,9 @@ function OverviewPage({ section, sliderCopies, toolIcons, theme }) {
   const dockPointerXRef = useRef(null)
   const dockHoverActiveRef = useRef(false)
   const isLightTheme = theme === 'light'
+  const mobileFooterBorderClass = isLightTheme ? 'border-[#7f886f]/40' : 'border-white/10'
+  const mobileFooterLabelClass = isLightTheme ? 'text-[#5f6850]' : 'text-white/40'
+  const mobileFooterBodyClass = isLightTheme ? 'text-[#3f4635]' : 'text-white/68'
 
   useEffect(() => {
     const footerNode = mobilePurposeRef.current
@@ -137,22 +143,22 @@ function OverviewPage({ section, sliderCopies, toolIcons, theme }) {
   }, [])
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="grid flex-1 grid-cols-1 gap-8 py-5 lg:grid-cols-[1.1fr_0.9fr] lg:py-8">
-        <div className="flex min-w-0 flex-col rounded-[1.75rem] p-2">
-          <p className="max-w-xl whitespace-pre-line text-base leading-8 text-slate-300">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="grid min-h-0 flex-1 content-center grid-cols-1 gap-5 py-4 lg:grid-cols-[1.05fr_0.95fr] lg:gap-4 lg:py-5">
+        <div className="flex min-w-0 flex-col rounded-[1.75rem] p-1">
+          <p className="max-w-[35rem] whitespace-pre-line text-[0.88rem] leading-6 text-slate-300 lg:text-[0.86rem] lg:leading-6">
             {section.description}
           </p>
         </div>
 
-        <div className="grid gap-4 self-start lg:min-h-[26rem] lg:grid-rows-3 lg:gap-5">
+        <div className="grid gap-2.5 self-center lg:min-h-[20.5rem] lg:grid-rows-3 lg:gap-3">
           {section.items.map((item) => (
             <TaggedPoint key={item.tag} tag={item.tag} text={item.text} />
           ))}
         </div>
       </div>
 
-      <div className="mt-auto w-full py-2">
+      <div className="mt-auto w-full shrink-0 py-1 lg:pt-0 lg:pb-1">
         <div
           className="marquee-mask"
           onMouseMove={handleDockMove}
@@ -168,7 +174,7 @@ function OverviewPage({ section, sliderCopies, toolIcons, theme }) {
                       const refIndex = (copy * toolIcons.length) + index
                       iconRefs.current[refIndex] = node
                     }}
-                    className="flex h-14 w-14 shrink-0 items-center justify-center text-[#93a66b]"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center text-[#93a66b] lg:h-9 lg:w-9"
                     aria-label={tool.name}
                     title={tool.name}
                     style={{ willChange: 'transform, filter' }}
@@ -182,25 +188,14 @@ function OverviewPage({ section, sliderCopies, toolIcons, theme }) {
         </div>
       </div>
 
-      <div ref={mobilePurposeRef} className={`w-full border-t pt-6 lg:hidden ${
-        isLightTheme ? 'border-[#7f886f]/40' : 'border-white/10'
-      }`}>
+      <div ref={mobilePurposeRef} className={`w-full border-t pt-5 lg:hidden ${mobileFooterBorderClass}`}>
         <div className="px-1">
-          <p className={`text-[0.62rem] uppercase tracking-[0.28em] ${
-            isLightTheme ? 'text-[#5f6850]' : 'text-white/40'
-          }`}>
-            Portfolio Purpose
-          </p>
-          <p className={`mt-2 max-w-[34rem] text-[0.92rem] leading-6 ${
-            isLightTheme ? 'text-[#3f4635]' : 'text-white/68'
-          }`}>
-            This portfolio serves as a simple presentation of my work, skills, and growth as a
-            frontend developer.
-          </p>
+          <p className={`text-[0.54rem] uppercase tracking-[0.22em] ${mobileFooterLabelClass}`}>{overviewFooterTitle}</p>
+          <p className={`mt-1.5 max-w-[34rem] text-[0.8rem] leading-5 ${mobileFooterBodyClass}`}>{overviewFooterBody}</p>
         </div>
       </div>
 
-      <div className="hidden lg:block">
+      <div className="mt-3 hidden shrink-0 lg:block">
         <SectionFooterCards theme={theme} />
       </div>
 

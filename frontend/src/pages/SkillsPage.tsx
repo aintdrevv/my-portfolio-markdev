@@ -23,7 +23,7 @@ function CellSpotlight() {
 
 function Pill({ label }) {
   return (
-    <span className="border border-white/10 bg-white/[0.03] px-2 py-1 font-dm-mono text-[9px] uppercase tracking-[0.07em] text-white/52">
+    <span className="border border-white/10 bg-white/[0.03] px-2 py-1 font-dm-mono text-[8px] uppercase tracking-[0.07em] text-white/52">
       {label}
     </span>
   )
@@ -35,19 +35,19 @@ function HeroCell({ title, description, pills, sub, className, containerRef, onM
       ref={containerRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className={`group relative flex min-h-[12.5rem] flex-col justify-between overflow-hidden border border-white/8 bg-transparent px-4 py-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 ${className}`}
+      className={`group relative flex min-h-[10.75rem] flex-col justify-between overflow-hidden border border-white/8 bg-transparent px-4 py-3.5 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 ${className}`}
     >
       <CellSpotlight />
       <CellSurface />
       <CellBar />
       <div className="relative z-10">
         <div
-          className="font-bebas text-[1.85rem] uppercase leading-none tracking-[0.06em] text-[#93a66b]"
+          className="font-bebas text-[1.4rem] uppercase leading-none tracking-[0.05em] text-[#93a66b]"
           style={{ color: ACCENT }}
         >
           {title}
         </div>
-        <p className="mt-2 max-w-[13rem] font-space-grotesk text-[11px] font-light leading-6 text-white/35">
+        <p className="mt-2 max-w-[13rem] font-space-grotesk text-[9px] font-light leading-5 text-white/35">
           {description}
         </p>
         <div className="mt-4 flex flex-wrap gap-[5px]">
@@ -56,7 +56,7 @@ function HeroCell({ title, description, pills, sub, className, containerRef, onM
           ))}
         </div>
       </div>
-      <div className="relative z-10 mt-3 font-dm-mono text-[9px] uppercase tracking-[0.12em] text-white/20">{sub}</div>
+      <div className="relative z-10 mt-3 font-dm-mono text-[8px] uppercase tracking-[0.12em] text-white/20">{sub}</div>
     </div>
   )
 }
@@ -67,16 +67,16 @@ function SkillCell({ label, sub, className, mini = false, containerRef, onMouseM
       ref={containerRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className={`group relative flex flex-col justify-end overflow-hidden border border-white/8 bg-transparent px-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:border-white/14 ${mini ? 'min-h-[3.25rem] py-2.5' : 'min-h-[4.75rem] py-3.5'} ${className}`}
+      className={`group relative flex flex-col justify-end overflow-hidden border border-white/8 bg-transparent px-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:border-white/14 ${mini ? 'min-h-[2.8rem] py-2' : 'min-h-[4rem] py-2.5'} ${className}`}
     >
       <CellSpotlight />
       <CellSurface />
       <CellBar />
-      <div className={`${mini ? 'text-[11px]' : 'text-[13px]'} relative z-10 font-space-grotesk font-medium text-white/70`}>
+      <div className={`${mini ? 'text-[9px]' : 'text-[11px]'} relative z-10 font-space-grotesk font-medium text-white/70`}>
         {label}
       </div>
       {sub ? (
-        <div className="relative z-10 mt-1 font-dm-mono text-[9px] uppercase tracking-[0.1em] text-white/20">{sub}</div>
+        <div className="relative z-10 mt-1 font-dm-mono text-[8px] uppercase tracking-[0.1em] text-white/20">{sub}</div>
       ) : null}
     </div>
   )
@@ -88,14 +88,14 @@ function WideCell({ title, pills, sub, className, topAlign = false, containerRef
       ref={containerRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className={`group relative flex justify-between overflow-hidden border border-white/8 bg-transparent px-4 py-4 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 ${topAlign ? 'items-start' : 'items-end'} ${className}`}
+      className={`group relative flex justify-between overflow-hidden border border-white/8 bg-transparent px-4 py-3 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 ${topAlign ? 'items-start' : 'items-end'} ${className}`}
     >
       <CellSpotlight />
       <CellSurface />
       <CellBar />
       <div className="relative z-10">
         <div
-          className="font-bebas text-[1.75rem] uppercase leading-none tracking-[0.06em] text-[#93a66b]"
+          className="font-bebas text-[1.3rem] uppercase leading-none tracking-[0.05em] text-[#93a66b]"
           style={{ color: ACCENT }}
         >
           {title}
@@ -106,7 +106,7 @@ function WideCell({ title, pills, sub, className, topAlign = false, containerRef
           ))}
         </div>
       </div>
-      <div className="relative z-10 font-dm-mono text-[9px] uppercase tracking-[0.12em] text-white/20">{sub}</div>
+      <div className="relative z-10 font-dm-mono text-[8px] uppercase tracking-[0.12em] text-white/20">{sub}</div>
     </div>
   )
 }
@@ -120,13 +120,13 @@ function MarqueeCell({ className, containerRef, onMouseMove, onMouseLeave }) {
       ref={containerRef}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className={`group relative overflow-hidden flex min-h-[4.75rem] flex-col justify-between border border-white/8 bg-transparent px-4 py-3 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 ${className}`}
+      className={`group relative overflow-hidden flex min-h-[4.2rem] flex-col justify-between border border-white/8 bg-transparent px-4 py-3 transition duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:border-white/14 ${className}`}
     >
       <CellSpotlight />
       <CellSurface />
       <CellBar />
       <style>{`@keyframes skills-marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
-      <div className="relative z-10 font-dm-mono text-[9px] uppercase tracking-[0.14em] text-white/45">
+      <div className="relative z-10 font-dm-mono text-[8px] uppercase tracking-[0.14em] text-white/45">
         Currently Learning
       </div>
       <div className="relative z-10 overflow-hidden whitespace-nowrap">
@@ -137,7 +137,7 @@ function MarqueeCell({ className, containerRef, onMouseMove, onMouseLeave }) {
           {doubled.map((item, index) => (
             <span
               key={`${item}-${index}`}
-              className="mr-4 font-dm-mono text-[9px] uppercase tracking-[0.1em] text-white/25"
+              className="mr-4 font-dm-mono text-[8px] uppercase tracking-[0.1em] text-white/25"
             >
               {item}
             </span>
